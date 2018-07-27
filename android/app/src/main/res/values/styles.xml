@@ -1,0 +1,11 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->  
+         <!-- sets cursor color by shivani-->
+        <item name="colorControlActivated">@color/blue</item>
+         <!-- <item name="colorControlActivated">@null</item>       -->
+    </style>
+
+</resources>

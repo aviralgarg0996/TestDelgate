@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "742650122031",
+    "firebase_url": "https://delgate-1523651947617.firebaseio.com",
+    "project_id": "delgate-1523651947617",
+    "storage_bucket": "delgate-1523651947617.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:742650122031:android:71c02183d6c00b01",
+        "android_client_info": {
+          "package_name": "com.delgate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "742650122031-6mjnu58i3kiqb6cc18rvqr3t8bibl7ou.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "742650122031-6mjnu58i3kiqb6cc18rvqr3t8bibl7ou.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-NkmvAqLgcXTW-nU8A4wagXRY4oChy_Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
