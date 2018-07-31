@@ -31,15 +31,35 @@ const initialState = AppNavigator.router.getStateForAction(NavigationActions.res
 export default function reducer(state = initialState, action) {
    console.log('action *********',action.payload)
     let firstState = "SplashScreen";
-    //let firstState = "DriverForm";
-        if(action == undefined){
-          firstState = "Login";
+//    let firstState = "DriverForm";
+        if(action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data){
+            if(action.payload.user.driverData.data.multiRole[0].status){
+                firstState = "customerprofile"//"profile"
+            }
+            else{
+                firstState = "SplashScreen"//"customerprofile"//
+            }
         }
         else if((action.payload && action.payload.user && action.payload.user.userData && action.payload.user.userData.data && action.payload.user.userData.data.driverStatus == 'rejected')){
             firstState = "DriverForm"
         }
         else if((action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data && action.payload.user.driverData.data.driverStatus == 'rejected')){
             firstState = "DriverForm"
+        }
+        else if(action == undefined){
+           firstState = "Login";
+        }
+        else if(action.payload && action.payload.user && action.payload.user.userData && action.payload.user.userData.data && action.payload.user.userData.data.driverStatus == 'pending'){
+            firstState = "profile"
+        }
+        else if(action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data && action.payload.user.driverData.data.driverStatus == 'pending'){
+            firstState = "profile"
+        }
+        else if(action.payload && action.payload.user && action.payload.user.userData && action.payload.user.userData.data && action.payload.user.userData.data.driverStatus == 'approved'){
+            firstState = "profile"
+        }
+        else if(action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data && action.payload.user.driverData.data.driverStatus == 'approved'){
+            firstState = "customerprofile"//"profile"
         }
         else{
            firstState = "SplashScreen";

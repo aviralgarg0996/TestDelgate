@@ -103,27 +103,26 @@ android {
         versionCode 12
         versionName "9"
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a"//, "x86"
         }
+    }
+    signingConfigs {
+  		release {
+  			storeFile file(MYAPP_RELEASE_STORE_FILE)
+  			storePassword MYAPP_RELEASE_STORE_PASSWORD
+  			keyAlias MYAPP_RELEASE_KEY_ALIAS
+  			keyPassword MYAPP_RELEASE_KEY_PASSWORD
+  		}
     }
     splits {
         abi {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
             universalApk false  // If true, also generate a universal APK
-            include "armeabi-v7a", "x86"
+            include "armeabi-v7a"//, "x86"
         }
     }
-    signingConfigs {
-        release {
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
-                storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword MYAPP_RELEASE_STORE_PASSWORD
-                keyAlias MYAPP_RELEASE_KEY_ALIAS
-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
-            }
-        }
-    }
+
     buildTypes {
         release {
             minifyEnabled enableProguardInReleaseBuilds
@@ -136,7 +135,8 @@ android {
         variant.outputs.each { output ->
             // For each separate APK per architecture, set a unique version code as described here:
             // http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits
-            def versionCodes = ["armeabi-v7a":1, "x86":2]
+            //def versionCodes = ["armeabi-v7a":1, "x86":2]
+            def versionCodes = ["armeabi-v7a":1]
             def abi = output.getFilter(OutputFile.ABI)
             if (abi != null) {  // null for the universal-debug, universal-release variants
                 output.versionCodeOverride =
@@ -148,6 +148,8 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-linear-gradient')
+    compile project(':react-native-wheel-picker')
     compile project(':react-native-charts-wrapper')
     compile project(':react-native-svg')
     compile project(':react-native-image-picker')

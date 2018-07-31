@@ -5,103 +5,160 @@
  */
 
 import React, { Component } from 'react';
-import { AppRegistry, StyleSheet, Image, View, StatusBar, TouchableOpacity,alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Modal
+} from 'react-native';
 
+//import { Switch } from 'react-native-switch';
+import Constants from "../../../constants";
+import NavigationBar  from "react-native-navbar";
+import OrderHistory from '../../../components/driver/OrderHistory';
+import DriverSchedule from '../../../components/driver/DriverSchedule';
+//import BarChart from '../../../components/driver/BarChartScreen';
+import VideoPlayer from '../../../components/driver/Video';
+import ToogleSwitch from '../../../components/common/ToggleSwitch';
+import { connect } from 'react-redux';
+import DriverFormSubmit from '../../../components/driver/DriverFormSubmit';
+import DriverFormReject from '../../../components/driver/DriverFormReject';
 
-import MapView from 'react-native-maps';
-import { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import Dimensions from 'Dimensions';
-
-
-const {width, height} = Dimensions.get('window');
-
-const SCREEN_HEIGHT = height;
-const SCREEN_WIDTH = width;
-const ASPECT_RATIO = width / height;
-const LATITUDE_DELTA = 1;
-const LONGITUDE_DELTA = 1;//LATITUDE_DELTA * ASPECT_RATIO;
-export default class Home extends Component<{}> {
+class Home extends Component<{}> {
   constructor(props){
     super(props);
-    this.state = {
-      error:null,
-      initialPosition:
-      {
-        longitude:30.7046,
-        latitude:76.7179,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      },
-      markerPosition:{
-        longitude:30.7046,
-        latitude:76.7179,
-      }
+    this.state={
+      availabilityStatus:props.driverAvailabilityStatus
     }
-  };
-
-  watchID: ?number = null;
-
-
-  /*componentDidMount()
-  {
-    navigator.geolocation.getCurrentPosition((position) => {
-      var lat = position.coords.latitude;
-      var long = position.coords.longitude;
-
-        var initialRegion={
-          latitude : lat,
-          longitude : long,
-          latitudeDelta : LATITUDE_DELTA,
-          longitudeDelta : LONGITUDE_DELTA,
-        }
-
-      this.setState({initialPosition:initialRegion});
-      this.setState({markerPosition:initialRegion});
-      },
-      (error) => this.setState({ error: error.message }),
-      { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 },
-    );
-
-    this.watchID = navigator.geolocation.getCurrentPosition((position) => {
-      var lat = position.coords.latitude;
-      var long = position.coords.longitude;
-
-      var lastRegion={
-        latitude : lat,
-        longitude : long,
-        latitudeDelta : LATITUDE_DELTA,
-        longitudeDelta : LONGITUDE_DELTA,
-      }
-
-      this.setState({initialPosition:lastRegion});
-      this.setState({markerPosition:lastRegion});
-      });
+    //console.log('props ********* ',props)
   }
 
-  componentWillUnmount()
-  {
-    navigator.geolocation.clearWatch(this.watchID);
-  }*/
+  componentWillReceiveProps(nextProps){
+    //console.log('nextProps ******* ',nextProps)
+    this.setState({
+      availabilityStatus:nextProps.driverAvailabilityStatus,
+    })
+
+      // console.log('next props ***********', nextProps )
+      // var date = new Date(), y = date.getFullYear(), m = date.getMonth();
+      // var firstDay = new Date(y, m, 1);
+      // var lastDay = new Date(y, m + 1, 0);
+      
+      // firstDay = moment(firstDay).format("YYYY-MM-DD");
+      // lastDay = moment(lastDay).format("YYYY-MM-DD");
+      // this.setState({
+      //   startDate:firstDay,
+      //   endDate:lastDay,
+      //   scheduleDatesList: nextProps.scheduleDatesList
+      //   },()=>{
+      //     console.log('isnide componet will mount home ********* ',{...this.state},this.props.tokenforuser) 
+      //     this.props.ScheduleActions.scheduledDateList({...this.state},this.props.tokenforuser);
+      // })
+      //this.forceUpdate()
+  }
+  // refreshCalendor=()=>{
+  //   console.log('refreshCalendor' )
+
+  //  // this.refs.child.calendorUpdate();
+
+
+
+  // }
+  homeSchedule(){
+    
+  
+    this.props.navigation.navigate('Home_ScheduleOrder',{selectedDateObj:new Date(),refreshCal: this.refreshCalFunction})
+    
+      }
+
+      refreshCalFunction=()=>{
+    
+    console.log('refreshCalendor')
+
+    this.child.calendorUpdate();
+  
+    
+      }
 
   render() {
+    const titleConfig = {
+      title: "HOME",
+      tintColor: "#fff",
+      style:{fontSize:18,fontWeight:'600'}
+    };
+    const { navigate } = this.props.navigation;
 
     return (
-      <View style={styles.container}>
-        <MapView
-          style={styles.map}
-          region={this.state.initialPosition}
-          showsUserLocation={true}
-          followsUserLocation={true}>
-
-          <MapView.Marker
-            coordinate={this.state.markerPosition}
-            title={"Your Location"}>
-            {/*<View style={styles.radius}>
-              <View style={styles.marker}>
+        <View style={styles.container}>
+          <NavigationBar
+            statusBar={{hidden:true}}
+            style={styles.navigationBar}
+            title={titleConfig}
+            rightButton={
+              <View style={styles.rightButtonNav}>
+                <TouchableOpacity onPress={()=>navigate('Settings')}>
+                <Image source={Constants.Images.user.setting} style={styles.navIcons} resizeMode={'contain'}/>
+                </TouchableOpacity>
+                  <View style={{marginHorizontal:Constants.BaseStyle.DEVICE_WIDTH/100 * 2}} >
+                    <ToogleSwitch availabilityStatus={this.state.availabilityStatus}/>
+                </View>
               </View>
+            }
+            leftButton={
+                <TouchableOpacity onPress={()=>navigate('DrawerOpen')}>
+                  <Image source={Constants.Images.user.user} style={[styles.navIcons,{marginLeft:Constants.BaseStyle.DEVICE_WIDTH/100 * 2}]} resizeMode={'contain'}/>
+                </TouchableOpacity>}
+          />
+
+          <ScrollView>
+            <View style={styles.sectionHeaders}>
+              <Text style={styles.textBlue}>Order History</Text>
+              <TouchableOpacity onPress={()=>navigate('Orders')}>
+                <Text style={[styles.textOrange,{textDecorationLine:'underline'}]}>View all Orders</Text>
+              </TouchableOpacity>
+            </View>
+
+            <OrderHistory />
+
+            <View style={styles.sectionHeaders}>
+              <Text style={styles.textBlue}>Your Schedule</Text>
+              <TouchableOpacity onPress={()=>{this.homeSchedule()}}>
+                <Text style={[styles.textOrange,{textDecorationLine:'underline'}]}>Scheduled Orders</Text>
+              </TouchableOpacity>
+            </View>
+
+            <DriverSchedule   onRef={ref => (this.child = ref)}   navigationProps={navigate}/>
+
+            {/* <View style={styles.sectionHeaders}>
+            <Text style={styles.textBlue}>Reports</Text>
+            <TouchableOpacity onPress={()=>navigate('Home_ScheduleOrder')}>
+            <Text style={[styles.textOrange,{textDecorationLine:'underline'}]}>More Reports</Text>
+            </TouchableOpacity>
+            </View> */}
+            {/*<BarChart barStyle={{height:Constants.BaseStyle.DEVICE_HEIGHT/100 * 40}} />
+            <View style={styles.reportSection}>
+            <Text style={styles.textBlue}>Training</Text>
             </View>*/}
-          </MapView.Marker>
-        </MapView>
+
+            <View style={styles.sectionHeaders}>
+              <Text style={styles.textBlue}>Training</Text>
+            </View>
+
+            <VideoPlayer videoStyle={{height:Constants.BaseStyle.DEVICE_HEIGHT/100 * 40, margin:10}} />
+            {this.props.userData && this.props.userData.data.driverStatus == 'pending' &&
+              <Modal animationType={"fade"} transparent={true} visible={this.props.modalstate.FormSubmitModalVisible} onRequestClose={() => {this.props.navigation.dispatch({type:'FORMSUBMIT_VISIBILITY',visibility:false})}}>
+                <DriverFormSubmit navigation={this.props.navigation} dispatch={this.props.navigation} />
+              </Modal>
+            }
+            {this.props.userData && this.props.userData.data.driverStatus == 'rejected' &&
+              <Modal animationType={"fade"} transparent={true} visible={this.props.modalstate.FormRejectModalVisible} onRequestClose={() => {this.props.navigation.dispatch({type:'FORMREJECT_VISIBILITY',visibility:false})}}>
+                <DriverFormReject navigation={this.props.navigation} dispatch={this.props.navigation} />
+              </Modal>
+            }
+          </ScrollView>
       </View>
     );
   }
@@ -109,36 +166,51 @@ export default class Home extends Component<{}> {
 
 const styles = StyleSheet.create({
   container: {
-    flex:1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor:'#F5FCFF'
+    flex: 1
   },
-  map: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  navigationBar:{
+    backgroundColor:Constants.Colors.LightBlue,
+    height:Constants.BaseStyle.DEVICE_HEIGHT/100 * 10,
+    alignItems:'center'
   },
-  radius:{
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center'
+  rightButtonNav:{
+    flexDirection:'row',
+    alignItems:'center'
   },
-  marker: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: 'blue'
+  navIcons:{
+    height:Constants.BaseStyle.DEVICE_HEIGHT/100 * 7,
+    width: Constants.BaseStyle.DEVICE_WIDTH/100 * 7
   },
-  styleheight:
-  {
-    height:Dimensions.get('window').height,///100 * 40,
+  sectionHeaders:{
+    flexDirection:'row',
+    justifyContent:'space-between',
+    padding:Constants.BaseStyle.PADDING * .5,
+    alignItems:'center'
+  },
+  textBlue:{
+    fontSize:22,
+    fontWeight:'700',
+    color:Constants.Colors.Blue
+  },
+  textOrange:{
+    fontSize:16,
+    fontWeight:'600',
+    color:Constants.Colors.Orange
+  },
+  reportSection:{
+    padding:Constants.BaseStyle.PADDING * .5
   },
 });
+
+const mapStateToProps = state => ({
+  modalstate: state.ModalHandleReducer,
+  driverAvailabilityStatus: state.user.driverAvailabilityStatus,
+  userData: (state.user && state.user.driverData) || (state.user && state.user.userData),
+  //scheduleDatesList: state.schedule.scheduleDatesList,
+});
+
+// const mapDispatchToProps = dispatch => ({
+//   UserActions: bindActionCreators(UserActions, dispatch)
+// });
+
+export default connect(mapStateToProps, null)(Home);

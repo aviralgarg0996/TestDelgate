@@ -28,7 +28,7 @@ export default class MainScreen extends Component<{}> {
           <Image source={Constants.Images.user.ven} style={styles.driver} resizeMode={'contain'} />
         </TouchableOpacity>
         <Text style={styles.text}>Open Driver App</Text>
-        <TouchableOpacity onPress={()=>console.log('hello')} style={styles.imgContainer}>
+        <TouchableOpacity onPress={()=>navigate('CustomerHome')} style={styles.imgContainer}>
           <Image source={Constants.Images.user.cart} style={styles.customer} resizeMode={'contain'} />
         </TouchableOpacity>
         <Text style={styles.text}>Open Customer App</Text>

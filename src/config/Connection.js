@@ -1,15 +1,14 @@
 'use strict';
-const localhost       = "10.20.3.227:8283",
+const localhost       = "localhost:8081",//"10.20.3.27:3000",
       staging         = "delgate.mobilytedev.com",
-      akanksha        = "10.20.3.223:8283",
-      live            = "dgwus2devapi01.westus2.cloudapp.azure.com:8283";
+      live            = "13.127.98.44:8283";
 
-const running_url   = staging,
+const running_url   = live,
     http_url        = `http://${running_url}`,
     socket_url      = `ws://${running_url}/websocket`,
     apiBase_url     = `http://${running_url}/api/`,
     staticPagesUrl  = `http://${running_url}/`,
-    mediaBase_url   = `http://${running_url}/`;
+    mediaBase_url   = `http://${running_url}/uploadedFiles/`;
 
 export default class Connection {
     static getResturl() {
