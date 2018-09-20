@@ -123,7 +123,19 @@ if(imageType=='experience')
     }];
     return (
       <Background style={styles.mainContainer}>
+      
      <ScrollView style={styles.container}>
+     <View style={styles.headerStyle}>
+        <TouchableOpacity>
+          <View style={styles.personalHeaderStyle}><Text>Personal Info</Text></View>
+        </TouchableOpacity>
+        <TouchableOpacity 
+        onPress={()=>this.onSubmitPersonalData()}
+        >
+        <View style={styles.vehicleHeaderStyle}><Text>Vehicle Info</Text></View>
+        </TouchableOpacity>
+
+      </View>
 <View style={styles.rowContainerStyle}>
 <Toast
                     ref="toast"
@@ -348,6 +360,31 @@ ImagePicker:{
 imageView:{
   width:width*0.16,
   height:height*0.114
+},
+headerStyle:{
+  height:60,
+  flex:1,
+  flexDirection:"row"
+},
+personalHeaderStyle:{
+  backgroundColor:"gray",
+  flex:1,
+  width:width*0.5,
+  alignItems:"center",
+  justifyContent:"center",
+  fontSize:22,
+  color:"white",
+  borderBottomWidth :5,
+  borderBottomColor: '#000'
+},
+vehicleHeaderStyle:{
+  backgroundColor:"gray",
+  flex:1,
+  width:width*0.5,
+  alignItems:"center",
+  justifyContent:"center",
+  fontSize:22,
+  color:"white"
 }
 })
 

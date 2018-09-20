@@ -76,13 +76,17 @@ import Orders_Pending from "../containers/user/customer/Orders_Pending";
 import Orders_OnGoing from "../containers/user/customer/Orders_OnGoing";
 import Orders_Scheduled from "../containers/user/customer/Orders_Scheduled";
 
+import PersonalInfo from "../screens/driverform/PersonalInfo"
+import VehicleInfo from "../screens/driverform/VehicleInfo"
+
 // export list of routes.
 export default routes = {
     Loader : { screen: Loader },
     Login : { screen: Login },
     MainScreen : { screen: MainScreen },
     Register : { screen: Register },
-    DriverForm : {screen : DriverForm},
+    DriverForm : {screen : PersonalInfo},
+    DriverFormVehicleInfo:{screen:VehicleInfo},
     Followers : {screen : Followers},
     RatingReviews : {screen : RatingReviews},
     ManageScheduleTime : {screen : ManageScheduleTime},
