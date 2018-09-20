@@ -60,11 +60,11 @@ class Register extends Component<{}> {
       return;
     }
 
-    // if(!Regex.validateEmail(email.trim())) {
-    //   //alert(enterValidEmail);
-    //   dispatch(ToastActionsCreators.displayInfo('Enter a valid email'))
-    //   return;
-    // }
+    if(!Regex.validateEmail(email.trim())) {
+      //alert(enterValidEmail);
+      dispatch(ToastActionsCreators.displayInfo('Enter a valid email'))
+      return;
+    }
 
     if(_.isEmpty(phone.trim())) {
       //alert(enterMobile);
@@ -170,7 +170,7 @@ class Register extends Component<{}> {
               <View style={[styles.flexRow]}>
                 <TouchableOpacity onPress={() => this.termsAndConditions()}>
                   <Image source={this.state.termsAndConditions ? Constants.Images.driver.checked : Constants.Images.driver.unchecked} style={[{width:20, height:20}]} resizeMode={'contain'} />
-                </TouchableOpacity> 
+                </TouchableOpacity>
                 <Text style={[{color:Constants.Colors.White,flex:1 ,fontSize:14,fontWeight:"900"}]}>  I AGREE TO THE  <Text style={{color:Constants.Colors.Orange,fontSize:14,fontWeight:"900", marginLeft:10,alignSelf:'center',textDecorationLine:'underline'}} onPress={ ()=> Linking.openURL('https://google.com') }>TERMS AND CONDITIONS</Text></Text>
               </View>
             </View>
@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
     marginBottom:Constants.BaseStyle.DEVICE_HEIGHT/100 * 6,
   },
   inputTextViewStyle: {
+    borderWidth:3
     // marginTop:Constants.BaseStyle.DEVICE_HEIGHT/200*2,
     // marginVertical: Constants.BaseStyle.DEVICE_WIDTH*2/200,
     //borderWidth:1

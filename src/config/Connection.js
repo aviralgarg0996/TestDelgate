@@ -1,6 +1,6 @@
 'use strict';
 const localhost       = "localhost:8081",//"10.20.3.27:3000",
-      staging         = "delgate.mobilytedev.com",
+      //staging         = "delgate.mobilytedev.com",
       live            = "13.127.98.44:8283";
 
 const running_url   = live,
@@ -8,7 +8,7 @@ const running_url   = live,
     socket_url      = `ws://${running_url}/websocket`,
     apiBase_url     = `http://${running_url}/api/`,
     staticPagesUrl  = `http://${running_url}/`,
-    mediaBase_url   = `http://${running_url}/uploadedFiles/`;
+    mediaBase_url   = `http://${running_url}/`;
 
 export default class Connection {
     static getResturl() {

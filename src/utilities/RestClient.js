@@ -30,7 +30,7 @@ class RestClient {
             logintoken;
         return new Promise(function(fulfill, reject) {
             context.isConnected().then(() => {
-                    //console.log("url=> ",Connection.getResturl() + url ," requestObject=> ",params, " x-auth-token => ",token, " x-user-id => ",userId )
+                    console.log("url=> ",Connection.getResturl() + url ," requestObject=> ",params, " x-auth-token => ",token, " x-user-id => ",userId )
                     fetch(Connection.getResturl() + url, {
                             method : "POST",
                             timeout : 1000*1*60,
@@ -140,9 +140,9 @@ class RestClient {
                             method: "POST",
                             headers: {
                                 // 'Accept': 'application/json',
-                                'Content-Type': 'multipart/form-data',
+                                //'Content-Type': 'multipart/form-data',
                                 "token": token,
-                                "x-user-id": userId
+                                //"x-user-id": userId
                             },
                             body: params
                         })

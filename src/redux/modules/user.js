@@ -22,11 +22,16 @@ export const OTP_VERIFY = "OTP_VERIFY";
 export const CONSUMER_SIGNUP_PHONE = "CONSUMER_SIGNUP_PHONE";
 export const DEVICE_TOKEN = "DEVICE_TOKEN";
 export const GET_DRIVER_DATA = "GET_DRIVER_DATA";
+export const GET_DRIVER_DATA_STATUS = "GET_DRIVER_DATA_STATUS";
 export const NAVIGATE_TO_DRIVER_FORM = "NAVIGATE_TO_DRIVER_FORM";
 export const DRIVER_AVAILABILITY_STATUS = "DRIVER_AVAILABILITY_STATUS";
 export const DRIVER_FORM_NAV = "DRIVER_FORM_NAV";
 export const CITIES_LIST = "CITIES_LIST";
 export const CERTIFICATES_LIST = "CERTIFICATES_LIST";
+export const EXPERIENCETYPE_LIST = "EXPERIENCETYPE_LIST";
+export const VEHICLETYPE_LIST = "VEHICLETYPE_LIST";
+export const VEHICLECOMPANY_LIST = "VEHICLECOMPANY_LIST";
+export const VEHICLEMODAL_LIST = "VEHICLEMODAL_LIST";
 
 // Action Creators
 export const CONSUMER_SIGNUP = (data) => ({ type: REGISTER_NEW_USER,data});
@@ -38,11 +43,16 @@ export const OTP_VERIFY_SUCCESS = (data) => ({ type: OTP_VERIFY,data});
 export const CONSUMER_SIGNUP_PHONE_VERICATION = (data) => ({ type: CONSUMER_SIGNUP_PHONE, data });
 export const setDeviceToken = (data) => ({ type: DEVICE_TOKEN, data });
 export const GET_DRIVER = (data) => ({ type: GET_DRIVER_DATA, data });
+export const GET_DRIVER_STATUS = (data) => ({ type: GET_DRIVER_DATA_STATUS, data });
 export const NAVIGATE_DRIVER_FORM = (data) => ({ type: NAVIGATE_TO_DRIVER_FORM, data });
 export const DRIVER_AVAILABILITY = (data) => ({ type: DRIVER_AVAILABILITY_STATUS, data });
 export const DRIVER_FORM_NAVIGATION = (data) => ({ type: DRIVER_FORM_NAV, data });
 export const GET_CITIES_LIST = (data) => ({ type: CITIES_LIST, data });
 export const GET_CERTIFICATES_LIST = (data) => ({ type: CERTIFICATES_LIST, data });
+export const GET_EXPERIENCETYPE_LIST = (data) => ({ type: EXPERIENCETYPE_LIST, data });
+export const GET_VEHICLETYPE_LIST = (data) => ({ type: VEHICLETYPE_LIST, data });
+export const GET_VEHICLECOMPANY_LIST = (data) => ({ type: VEHICLECOMPANY_LIST, data });
+export const GET_VEHICLEMODAL_LIST = (data) => ({ type: VEHICLEMODAL_LIST, data });
 //perform api's related to user
 
 /**
@@ -201,7 +211,7 @@ export const resendEmailApi = (data) => {
 			//console.log('result email verify ******* ',result)
  		if(result.status==1){
     		dispatch(stopLoading());
-				alert(result.message);				
+				alert(result.message);
 	  	}else{
 	    	dispatch(stopLoading());
 	    	alert(result.message);
@@ -228,30 +238,45 @@ export const userLogin = (data) => {
 		dispatch(startLoading());
 		RestClient.post("users/login",requestObject).then((result) => {
 			console.log('result login ******* ',result)
- 		if(result.status == 1){
+ 		if(result.status == 1)
+    {
     		dispatch(stopLoading());
-    		if(result.data.emailVerified == 0 && result.data.phoneVerified == 0){
-	    			dispatch(ToastActionsCreators.displayInfo('your account is not verified yet. Please verify your email and phone'));
-	    			dispatch({type:'PHONEVERIFICATION_VISIBILITY',visibility:true})
-				 	dispatch({type:'NEWUSER_VISIBILITY',visibility:true})
-					//alert(result.message);
+    		if(result.data.emailVerified == 0 && result.data.phoneVerified == 0)
+        {
+          dispatch(CONSUMER_SIGNUP_PHONE_VERICATION({phone:result.data.phone,email:result.data.email}));
+          if(result.data.emailVerified == 0)
+          {
+            //console.log('inside phone Verification not done ********* ',result.data.phone)
+
+            dispatch({type:'EMAILVERIFICATION_VISIBILITY',visibility:true})
+          }
+          if(result.data.phoneVerified == 0)
+          {
+            //console.log('inside phone Verification not done ********* ',result.data.phone)
+            //dispatch(CONSUMER_SIGNUP_PHONE_VERICATION({phone:result.data.phone,email:result.data.email}));
+            dispatch({type:'PHONEVERIFICATION_VISIBILITY',visibility:true})
+          }
+
+          //dispatch(ToastActionsCreators.displayInfo(result.message));
 				}
-				if(result.data){
-				if(result.data.multiRole[0].status == false){
-					dispatch(DRIVER_FORM_NAVIGATION(result))
-					//dispatch(NAVIGATE_DRIVER_FORM(result))
-				}
-				else{
-					if(result.data.driverStatus == 'pending'){
-						dispatch({type:'FORMSUBMIT_VISIBILITY',visibility:true})
-					}
-    				dispatch(LOGIN(result));
-				}
-			}
-	  	}else{
-	    	dispatch(stopLoading());
-	    	dispatch(ToastActionsCreators.displayInfo(result.message));
-	  	}
+				else if(result.data)
+        {
+  				if(result.data.multiRole[0].status == false){
+  					dispatch(DRIVER_FORM_NAVIGATION(result))
+  					//dispatch(NAVIGATE_DRIVER_FORM(result))
+  				}
+  				else{
+  					if(result.data.driverStatus == 'pending'){
+  						dispatch({type:'FORMSUBMIT_VISIBILITY',visibility:true})
+  					}
+      				dispatch(LOGIN(result));
+  				}
+       }
+  	}
+    else{
+    	dispatch(stopLoading());
+    	dispatch(ToastActionsCreators.displayInfo(result.message));
+  	}
 		}).catch(error => {
 	  		console.log("error=> ", error)
 	  		dispatch(stopLoading());
@@ -263,37 +288,51 @@ export const userLogin = (data) => {
 * Driver Profile page one API.
 */
 export const userDriverForm= (data) => {
+	// alert(JSON.stringify(data))
 	console.log('data ********* ',data)
 		let body = new FormData();
-
-	
-
-		if (data.avatarSource && data.avatarSource.fileName) {
+		if (data.ProfileImageSource && data.ProfileImageSource.fileName) {
 			//console.log('inside profile if statemetn ********')
-			body.append('profilePic', { uri: data.avatarSource.uri, name: data.avatarSource.fileName, filename: data.avatarSource.fileName, type: data.avatarSource.type });
+			body.append('profilePic', {uri: data.ProfileImageSource.uri, name: data.ProfileImageSource.fileName, filename: data.ProfileImageSource.fileName, type: data.ProfileImageSource.type});
 		}
 		else {
 		//	console.log('inside else profilePic *********')
 			body.append('profilePic', "")
 		}
-		body.append('licenseNo', data.licenceNo);
-		body.append('licenceDate', data.licenceDate);   
-		body.append('dob', data.dob);
-		body.append('gender', data.sex);
-		body.append('ssn', data.sin)
+
+		body.append('licenseNo', data.licenceNumber);
+		body.append('licenceDate', data.licenceIssueDate);
+		body.append('dob', data.birthDate);
+    body.append('gender', data.sex);
+		body.append('ssn', data.sinNumber)
 		body.append('address', data.address);
-		body.append('about', data.aboutUS);
+		body.append('about', data.aboutYou);
 		body.append('page', "1");
-		body.append('experienceYear', data.experienceYear);
-		body.append('experienceMon', data.experienceMonth);
-		body.append('experienceType', data.experience);
-		body.append('firstName', data.firstname);
-		body.append('lastName', data.lastname);
+		// body.append('experienceYear', data.experienceYear);
+		// body.append('experienceMon', data.experienceMonth);
+    var arr1=[];
+    // if(data.experience.length>0)
+    // {
+    //   data.experience.map((item,i) => {
+    //     arr1[i]=item._id;
+    //   });
+    // }
+    body.append('experienceType',JSON.stringify(arr1));
+		body.append('firstName', data.firstName);
+		body.append('lastName', data.lastName);
 		body.append('role', "DRIVER");
 		body.append('lat', "45.63");
 		body.append('lng', "52.36");
-		body.append('cities',JSON.stringify(data.cities));
-		if (data.imgSourceExperience) {
+		//body.append('cities',JSON.stringify(data.cities));
+    var arr1=[];
+    // if(data.cities.length>0)
+    // {
+    //   data.cities.map((item,i) => {
+    //     arr1[i]=item._id;
+    //   });
+    // }
+    //body.append('servingareas',JSON.stringify(arr1));
+		/*if (data.imgSourceExperience) {
 			data.imgSourceExperience.map((item, i) => {
 	           let filename = item.fileName;
 	           body.append('add_image', {
@@ -305,13 +344,13 @@ export const userDriverForm= (data) => {
 		}
 		else {
 			body.append('add_image', data.imgSourceExperience)
-		}
-		
-		body.append('certificates',JSON.stringify(data.certificates));
-		//body.append('cities', data.locationServe);
+		}*/
+
+		//body.append('certificates',JSON.stringify(data.certificates));
+		////body.append('cities', data.locationServe);
 
 		console.log('data body  ********* ',body)
-	
+
 		return dispatch => {
 			dispatch(startLoading());
 			RestClient.imageUpload("users/profile",body,data.token).then((result) => {
@@ -330,7 +369,7 @@ export const userDriverForm= (data) => {
 			});
 		}
 	};
-	
+
 	/**
 	* Driver Profile page two API.
 	*/
@@ -340,7 +379,7 @@ export const userDriverForm= (data) => {
 		let body = new FormData();
 
 		body.append('plateNo', data.vehicleNo);
-		body.append('type', data.vehicleType);   
+		body.append('type', data.vehicleType);
 		body.append('make', data.makeOfVehicle);
 		body.append('modelYear', data.year);
 		body.append('model', data.vehicleModel)
@@ -358,7 +397,11 @@ export const userDriverForm= (data) => {
 		}else{
 			body.append('addVehicleImage', data.imgSourceVehicle)
 		}
-		body.append('equipment', data.equipment);
+    var arr1=[];
+    data.equipment.map((item,i) => {
+      arr1[i]=item._id;
+    });
+		//body.append('equipment', arr1);
 		if (data.LicenceImage && data.LicenceImage.fileName) {
 			body.append('license', { uri: data.LicenceImage.uri, name: data.LicenceImage.fileName, filename: data.LicenceImage.fileName, type: data.LicenceImage.type });
 		}
@@ -400,10 +443,10 @@ export const userDriverForm= (data) => {
 		// }else{
 		// 	body.append('addDocs', data.vehicleDocs)
 		// }
-		
+
 		//body.append('addDocs', data.vehicleDocs);
 		body.append('driverForm', data.saveState);
-	
+
 		return dispatch => {
 			dispatch(startLoading());
 			RestClient.imageUpload("users/profile",body,data.token).then((result) => {
@@ -412,7 +455,7 @@ export const userDriverForm= (data) => {
 					dispatch(stopLoading());
 					if(saveState) {
 						if(result.data.driverStatus == 'pending'){
-							dispatch({type:'FORMSUBMIT_VISIBILITY',visibility:true}) 
+							dispatch({type:'FORMSUBMIT_VISIBILITY',visibility:true})
 						}
 						if(result.data.driverStatus == 'rejected'){
 							dispatch({type:'FORMREJECT_VISIBILITY',visibility:true})
@@ -422,7 +465,7 @@ export const userDriverForm= (data) => {
 					// dispatch(ToastActionsCreators.displayInfo(result.message));
 				}else{
 					dispatch(stopLoading());
-	
+
 					// dispatch(ToastActionsCreators.displayInfo(result.message));
 				}
 			}).catch(error => {
@@ -436,7 +479,8 @@ export const userDriverForm= (data) => {
 /* Get Driver Api */
 export const getDriverData =(token)=> {
   return dispatch => {
-    dispatch(startLoading());
+		dispatch(startLoading());
+		console.log("tokennnnnn   :",JSON.stringify(token))
     RestClient.post("users/getDriver",{},token).then((result) => {
   	console.log('result getDriverData ****** ',result)
       if(result.status === 1){
@@ -454,12 +498,33 @@ export const getDriverData =(token)=> {
   }
 }
 
+/* Get Driver Api */
+export const getDriverStatus =(token)=> {
+  return dispatch => {
+    dispatch(startLoading());
+    RestClient.post("users/getDriver",{},token).then((result) => {
+  	console.log('result getDriverData ****** ',result)
+      if(result.status === 1){
+        dispatch(stopLoading());
+        // dispatch(ToastActionsCreators.displayInfo(result.message));
+        dispatch(GET_DRIVER_STATUS(result));
+      }else{
+        dispatch(stopLoading());
+        // dispatch(ToastActionsCreators.displayInfo(result.message));
+      }
+    }).catch(error => {
+      console.log("error=> " ,error)
+      dispatch(stopLoading());
+    });
+  }
+}
+
 /**
 *Logout user
 **/
 export const logout =(data)=> {
-//	console.log('data ****** ',data)
-  return dispatch => {
+
+    return dispatch => {
     dispatch(startLoading());
     RestClient.post("users/logout",{},data).then((result) => {
     	console.log('result logout ****** ',result)
@@ -493,7 +558,7 @@ export const forgotPassword =(data)=> {
 		dispatch(FORGOT_PASSWORD_SUCCESS(data.email))
 		dispatch({type:'FORGOT_PASSWORD_VISIBILITY',visibility:false})
         dispatch({type:'OTP_VERIFICATION_VISIBILITY',visibility:true})
-    
+
       }else{
         dispatch(stopLoading());
         alert(result.message);
@@ -541,7 +606,7 @@ export const resendForgotApi = (data) => {
 			//console.log('result email verify ******* ',result)
  		if(result.status==1){
     		dispatch(stopLoading());
-				alert(result.message);				
+				alert(result.message);
 	  	}else{
 	    	dispatch(stopLoading());
 	    	alert(result.message);
@@ -577,13 +642,13 @@ export const resetPassword =(data)=> {
 }
 
 
-/*** 
+/***
  * Availibility status
 ***/
 export const availibilityStatus = (data,token) => {
 
 	let	requestObject = {
-		"status" : data.status , 
+		"status" : data.status ,
     "isHelper" : data.isHelper,
     "isMobileHandler":data.isMobileHandler
 
@@ -611,24 +676,17 @@ export const availibilityStatus = (data,token) => {
 
 
 
-/*** 
+/***
  * get cities api
 ***/
 export const getCitiesList = (token) => {
-
-	
-	
 	return dispatch => {
 		dispatch(startLoading());
-		RestClient.get("drivers/getCity",{},token).then((result) => {
+		RestClient.post("admin/getcity").then((result) => {
 			console.log('result getCity ******* ',result)
  		if(result.status == 1){
 				dispatch(stopLoading());
 				dispatch(GET_CITIES_LIST(result.data));
-				
-			//	dispatch(ToastActionsCreators.displayInfo(result.status));
-			// console.log("getCity api response",result)
-			
 	  	}else{
 	    	dispatch(stopLoading());
 	   // 	dispatch(ToastActionsCreators.displayInfo(result));
@@ -640,7 +698,7 @@ export const getCitiesList = (token) => {
 	}
 };
 
-/*** 
+/***
  * get CERTIFICATES_LIST api
 ***/
 export const getCertificatesList = (token) => {
@@ -651,6 +709,87 @@ export const getCertificatesList = (token) => {
  		if(result.status == 1){
 			dispatch(stopLoading());
 			dispatch(GET_CERTIFICATES_LIST(result.data));
+	  	}
+		}).catch(error => {
+	  		console.log("error=> ", error)
+	  		dispatch(stopLoading());
+		});
+	}
+};
+
+/***
+ * get Experience Type api
+***/
+export const getExperienceTypeList = (token) => {
+  return dispatch => {
+		dispatch(startLoading());
+		RestClient.post("admin/getexperience",{},token).then((result) => {
+			console.log('result getexperience ******* ',result)
+ 		if(result.status == 1){
+			dispatch(stopLoading());
+			dispatch(GET_EXPERIENCETYPE_LIST(result.data));
+	  	}
+		}).catch(error => {
+	  		console.log("error=> ", error)
+	  		dispatch(stopLoading());
+		});
+	}
+}
+
+/***
+ * get VEHICLE TYPE api
+***/
+export const getVehicleTypeList = (token) => {
+	return dispatch => {
+		dispatch(startLoading());
+		RestClient.post("admin/getvehicle",{},token).then((result) => {
+			console.log('result getVechicleType ******* ',result)
+ 		if(result.status == 1){
+			dispatch(stopLoading());
+			dispatch(GET_VEHICLETYPE_LIST(result.data));
+	  	}
+		}).catch(error => {
+	  		console.log("error=> ", error)
+	  		dispatch(stopLoading());
+		});
+	}
+};
+
+/***
+ * get VEHICLE COMPANY api
+***/
+export const getMakeOfVehicleList = (token) => {
+
+	return dispatch => {
+		dispatch(startLoading());
+		RestClient.post("admin/getVehicleCompany",{},token).then((result) => {
+			console.log('result getVehicleCompany ******* ',result)
+ 		if(result.status == 1){
+			dispatch(stopLoading());
+			dispatch(GET_VEHICLECOMPANY_LIST(result.data));
+	  	}
+		}).catch(error => {
+	  		console.log("error=> ", error)
+	  		dispatch(stopLoading());
+		});
+	}
+};
+
+/***
+ * get VEHICLE MODAL api
+***/
+export const getVehicleModalList = (vehicleid,companyid) => {
+  let	requestObject = {
+    'vehicle_typeid' : vehicleid,
+		"company_id" : companyid,
+    }
+	return dispatch => {
+		dispatch(startLoading());
+		RestClient.post("admin/getVehicleModel",requestObject).then((result) => {
+			console.log('result getVehicleModel ******* ',result)
+ 		if(result.status == 1){
+			dispatch(stopLoading());
+			dispatch(GET_VEHICLEMODAL_LIST(result.data));
 	  	}
 		}).catch(error => {
 	  		console.log("error=> ", error)
@@ -673,7 +812,13 @@ const initialState = {
 	driverData  : null,
 	driverAvailabilityStatus: true,
 	citiesList:[],
-	certificatesList:[]
+	certificatesList:[],
+  experienceTypeList:[],
+  vehicleTypeList:[],
+  vehicleMakeList : [],
+  vehicleModelList : [],
+  driverStatus : '',
+  newdriverStatus:'',
 };
 
 /**
@@ -681,6 +826,7 @@ const initialState = {
 */
 export default function reducer(state = initialState, action) {
 	//console.log("action verification data phone ************",action.data)
+    var newstate = Object.assign({}, state);
     switch (action.type) {
 			case REGISTER_NEW_USER:
 				return { ...state, userData: action.data };
@@ -701,8 +847,17 @@ export default function reducer(state = initialState, action) {
 				return { ...state, deviceToken: action.data}
 
 			case GET_DRIVER_DATA:
-				return { ...state, driverData: action.data};
-			
+        newstate.driverData=[];
+        newstate.driverData=action.data;
+        newstate.driverStatus=action.data.data.driverStatus;
+        newstate.newdriverStatus=action.data.data.driverStatus;
+        return newstate;
+				//return { ...state, driverData: action.data};
+
+      case GET_DRIVER_DATA_STATUS:
+        newstate.newdriverStatus=action.data.data.driverStatus;
+        return newstate;
+
 			case NAVIGATE_TO_DRIVER_FORM:
 				return { ...state, userData: null };
 
@@ -712,11 +867,35 @@ export default function reducer(state = initialState, action) {
 			case DRIVER_AVAILABILITY_STATUS:
 				return { ...state, driverAvailabilityStatus: action.data.availableStatus};
 
-			case CITIES_LIST:     
+			case CITIES_LIST:
 				return { ...state, citiesList: action.data};
-			case CERTIFICATES_LIST:  
-			return { ...state, certificatesList: action.data};
-						
+			case CERTIFICATES_LIST:
+			   return { ...state, certificatesList: action.data};
+
+       case EXPERIENCETYPE_LIST:
+        return { ...state, experienceTypeList: action.data};
+
+      case VEHICLETYPE_LIST:
+        return { ...state, vehicleTypeList: action.data};
+
+      case VEHICLECOMPANY_LIST:
+        newstate.vehicleMakeList=[];
+        var arr1=[];
+        action.data.map((val,i) => {
+          arr1.push({value:val.name,tagid:val._id});
+        });
+        newstate.vehicleMakeList=arr1;
+        return newstate;
+
+      case VEHICLEMODAL_LIST:
+        newstate.vehicleModelList=[];
+        var arr1=[];
+        action.data.map((val,i) => {
+          arr1.push({value:val.name,tagid:val._id,room:val.room});
+        });
+        newstate.vehicleModelList=arr1;
+        return newstate;
+
 			case LOG_OUT:
 				return { ...initialState, deviceToken:state.deviceToken };
 

@@ -25,7 +25,7 @@ import SubmitButton from "../../components/common/FormSubmitButton";
 
 //var navigator=null;
 
-class NewUser extends Component<{}> {
+class NewUser extends Component {
   constructor(props){
     super(props);
   console.log('new user props ******* ',this.props)
@@ -48,7 +48,7 @@ class NewUser extends Component<{}> {
       <View  style={[styles.modalOuter]}>
           <View  style={styles.modalInner}>
             <KeyboardAvoidingView behavior={'position'}>
-              <TouchableHighlight underlayColor={Constants.Colors.Orange} style={[styles.btCloseModal]}  onPress={() => this.onPress()}>
+              <TouchableHighlight underlayColor={Constants.Colors.Orange} style={[styles.btCloseModal]}  onPress={() => this.props.dispatch({type : 'NEWUSER_VISIBILITY', visibility:false})}>
                 <Image source={Constants.Images.driver.close} style={[styles.btnCloseModalIcon]}/>
                </TouchableHighlight>
                <View>
@@ -56,7 +56,7 @@ class NewUser extends Component<{}> {
                      <Text style={styles.Subheadtext}>{Constants.Strings.newuser.desc}</Text>
                    </View>
                        <SubmitButton
-                         onPress={() => this.onPress()}
+                         onPress={() => this.props.dispatch({type : 'NEWUSER_VISIBILITY', visibility:false})}
                          text={Constants.Strings.newuser.buttonText}
                          style={[styles.ButtonStyle]}
                        />

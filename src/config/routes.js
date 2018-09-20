@@ -11,7 +11,8 @@ import NewUser from "../components/driver/NewUser";
 import Orders from "../containers/user/driver/Orders";
 import Messages from "../containers/user/driver/Messages";
 import Notification from "../containers/user/driver/Notification";
-import DriverForm from "../containers/user/driver/DriverForm";
+// import DriverForm from "../containers/user/driver/DriverForm";
+import DriverForm from "../screens/driverform/UpdDriverForm"
 import Followers from "../containers/user/driver/Followers";
 import RatingReviews from "../containers/user/driver/RatingReviews";
 import ManageSchedule from "../containers/user/driver/ManageSchedule";

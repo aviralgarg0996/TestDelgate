@@ -6,18 +6,18 @@ import Constants from '../../../constants'
 
 
 export default class SplashScreen extends Component {
- 
+
     constructor(props) {
         super(props);
         setTimeout(() => {
-         
-          this.props.navigation.navigate("AppIntroduction")
+
+          this.props.navigation.navigate("Login");//("AppIntroduction");//
         }, 2000);
       }
 
   render() {
     return (
-       
+
     <ImageBackground
         style={{
           flex: 1,
@@ -27,7 +27,7 @@ export default class SplashScreen extends Component {
         source= {require('../../../assets/images/background.png')}
 >
       <Image
-      
+
     resizeMode="center"
       source= {require('../../../assets/images/appName.png')}
     />

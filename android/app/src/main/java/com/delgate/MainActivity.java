@@ -1,6 +1,9 @@
 package com.delgate;
 
 import com.facebook.react.ReactActivity;
+import com.airbnb.android.react.maps.MapsPackage;
+import com.reactnative.ivpusic.imagepicker.PickerPackage;
+import com.devfd.RNGeocoder.RNGeocoderPackage;
 import android.content.Intent;
 
 public class MainActivity extends ReactActivity {

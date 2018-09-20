@@ -33,6 +33,12 @@ target 'DelGate' do
 
   pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
 
+  pod 'react-native-image-resizer', :path => '../node_modules/react-native-image-resizer'
+
+  pod 'RNFS', :path => '../node_modules/react-native-fs'
+
+  pod 'RNImageCropPicker', :path => '../node_modules/react-native-image-crop-picker'
+
 end
 
 post_install do |installer|

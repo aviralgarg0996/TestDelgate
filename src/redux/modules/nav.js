@@ -34,7 +34,7 @@ export default function reducer(state = initialState, action) {
 //    let firstState = "DriverForm";
         if(action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data){
             if(action.payload.user.driverData.data.multiRole[0].status){
-                firstState = "customerprofile"//"profile"
+                firstState = "profile"//"customerprofile"//"profile"
             }
             else{
                 firstState = "SplashScreen"//"customerprofile"//
@@ -55,11 +55,11 @@ export default function reducer(state = initialState, action) {
         else if(action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data && action.payload.user.driverData.data.driverStatus == 'pending'){
             firstState = "profile"
         }
-        else if(action.payload && action.payload.user && action.payload.user.userData && action.payload.user.userData.data && action.payload.user.userData.data.driverStatus == 'approved'){
-            firstState = "profile"
+        else if(action.payload && action.payload.user && action.payload.user.userData && action.payload.user.userData.data && action.payload.user.userData.data.driverStatus == 'approved' && action.payload.user.userData.data.role == 'CUSTOMER'){
+            firstState = "profile"//"customerprofile"//"profile"
         }
         else if(action.payload && action.payload.user && action.payload.user.driverData && action.payload.user.driverData.data && action.payload.user.driverData.data.driverStatus == 'approved'){
-            firstState = "customerprofile"//"profile"
+            firstState = "profile"
         }
         else{
            firstState = "SplashScreen";

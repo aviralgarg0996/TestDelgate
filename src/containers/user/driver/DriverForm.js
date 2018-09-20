@@ -17,7 +17,8 @@ import {
   ScrollView,
   TextInput,
   Modal,
-  FlatList
+  FlatList,
+  Alert
 } from 'react-native';
 import moment from "moment";
 import { connect } from 'react-redux';
@@ -41,55 +42,66 @@ import { Dropdown } from 'react-native-material-dropdown';
 import NewUserDialog from '../../../components/driver/NewUser';
 import Connection from '../../../config/Connection'
 import LabelSelect from '../../../components/common/LabelSelect';
+import ImageCropPicker from 'react-native-image-crop-picker';
 
 const futureDate = moment().add(20, 'years').format('YYYY-MM-DD');
-const currentDate = moment().add(1, 'days').format('YYYY-MM-DD');
+const currentDate = moment().format('YYYY-MM-DD');//moment().add(1, 'days').format('YYYY-MM-DD');
 const dateOfbirth = moment().subtract(16, 'years').format('YYYY-MM-DD');
 
+
+var ProgressBarArray=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 class DriverForm extends Component<{}> {
   constructor(props){
     super(props);
-    
+
 //console.log('props after email verification ******* ',this.props)
 // console.log('props  driver info ******* ',props.driverInfo);
     this.state={
+
       citiesList:props.citiesList,
       cities:[],
       certificatesList:props.certificatesList,
+      experienceTypeList : props.experienceTypeList,
+      vehicleTypeList : props.vehicleTypeList,
+      vehicleMakeList : props.vehicleMakeList,
+      vehicleModelList : props.vehicleModelList,
+      room : 'ROOM',
       certificates:[],
       gender:Constants.Strings.DropDownItems.gender ,
       yearList:Constants.Strings.DropDownItems.licenceYear,
       monthList:Constants.Strings.DropDownItems.experienceMonth,
       //certificateList:Constants.Strings.DropDownItems.certificates,
      // cityList:Constants.Strings.DropDownItems.citiesServe,
-      experienceList:Constants.Strings.DropDownItems.experienceType,
-      vehicleTypeList:Constants.Strings.DropDownItems.vehicleType,
-      vehicleMakeList:Constants.Strings.DropDownItems.vehicleMake,
-      vehicleModelList:Constants.Strings.DropDownItems.vehicleModel,
-      
+      //experienceList:Constants.Strings.DropDownItems.experienceType,
+      //vehicleTypeList:Constants.Strings.DropDownItems.vehicleType,
+      //vehicleMakeList:Constants.Strings.DropDownItems.vehicleMake,
+      //vehicleModelList:Constants.Strings.DropDownItems.vehicleModel,
+
       vehicleYearList:Constants.Strings.DropDownItems.vehicleYear,
       equipmentList:Constants.Strings.DropDownItems.equipment,
+      capacityList : Constants.Strings.DropDownItems.capacityList,
       insuranceExpiryList:Constants.Strings.DropDownItems.insuranceExpiryYear,
-      
+
       DriverInfo :props.driverInfo,
 
       // states for personal info form
+      isVisible : false,
       avatarSource:Constants.Images.driver.camera,
       firstname:'',
       lastname:'',
       dob :'',
       sex : '',
-      sin : '' ,
+      sin : '123456789' ,
       address : '' ,
       licenceNo : '',
       licenceDate:'' ,
-      experience : '',
+      experience : [],
       experienceYear:'',
       experienceMonth:'',
       experienceImage:Constants.Images.driver.circleplus,
       experienceImagesArray:[],
       aboutUS : '' ,
-     
+
       locationServe :'',
 
       // states for vehicle information form
@@ -99,6 +111,7 @@ class DriverForm extends Component<{}> {
       vehicleModel : '',
       year :'',
       equipment : '',
+      capacity:'0',
       insuranceNo : '',
       insuranceExpiry :'',
       vehicleImages:[],
@@ -124,20 +137,20 @@ class DriverForm extends Component<{}> {
       listItems : [],
 
 
-      genderColor:Constants.Colors.Blue,
-      dobColor:Constants.Colors.Blue,
-      licenceDateColor:Constants.Colors.Blue,
-      licenceYearColor:Constants.Colors.Blue,
-      licenceMonthColor:Constants.Colors.Blue,
-      experienceYearColor:Constants.Colors.Blue,
-      experienceMonthColor:Constants.Colors.Blue,
-      certificatesColor:Constants.Colors.Blue,
-      vehicleTypeColor:Constants.Colors.Blue,
-      makeOfVehicleColor:Constants.Colors.Blue,
-      vehicleModelColor:Constants.Colors.Blue,
-      yearColor:Constants.Colors.Blue,
-      equipmentColor:Constants.Colors.Blue,
-      insuranceExpiryColor:Constants.Colors.Blue,
+      genderColor:Constants.Colors.BlurGrey,
+      dobColor:Constants.Colors.BlurGrey,
+      licenceDateColor:Constants.Colors.BlurGrey,
+      licenceYearColor:Constants.Colors.BlurGrey,
+      licenceMonthColor:Constants.Colors.BlurGrey,
+      experienceYearColor:Constants.Colors.BlurGrey,
+      experienceMonthColor:Constants.Colors.BlurGrey,
+      certificatesColor:Constants.Colors.BlurGrey,
+      vehicleTypeColor:Constants.Colors.BlurGrey,
+      makeOfVehicleColor:Constants.Colors.BlurGrey,
+      vehicleModelColor:Constants.Colors.BlurGrey,
+      yearColor:Constants.Colors.BlurGrey,
+      equipmentColor:Constants.Colors.BlurGrey,
+      insuranceExpiryColor:Constants.Colors.BlurGrey,
       allFieldsFilled:false,
       token: props.modalstate.tokenDriverForm || props.driverData.token || props.userData.token,
       //not used anywhere
@@ -149,39 +162,119 @@ class DriverForm extends Component<{}> {
       onSubmitForm: false,
 
       imageType:''
-     
+
     }
-       
+
   }
 
 
-  componentWillMount() {
-
-
+  componentWillMount()
+  {
+    this.props.UserActions.getExperienceTypeList(this.props.tokenforuser);
     this.props.UserActions.getCitiesList(this.props.tokenforuser);
     this.props.UserActions.getCertificatesList(this.props.tokenforuser);
+    this.props.UserActions.getVehicleTypeList(this.props.tokenforuser);
+    this.props.UserActions.getMakeOfVehicleList(this.props.tokenforuser);
 
-if(!this.props.modalstate.NewUserModalVisible) {
-      this.props.UserActions.getDriverData(this.state.token);
+    if(!this.props.modalstate.NewUserModalVisible) {
+        this.setState({dobColor:Constants.Colors.Blue,genderColor:Constants.Colors.Blue,
+          licenceDateColor:Constants.Colors.Blue,insuranceExpiryColor:Constants.Colors.Blue,});
+          this.props.UserActions.getDriverData(this.props.tokenforuser);
     }
-   
+
+    var arr1=[];
+    this.props.vehicleTypeList.map((val,i) => {
+      arr1.push({value:val.name,tagid:val._id});
+    });
+
     if(this.props.driverData != null) {
+
+      if(this.props.driverData.data.profile != null)
+      {
+        this.setProgressBarValue(0);
+      }
+
+      if(this.props.driverData.data.firstName){this.setProgressBarValue(1);}
+      if(this.props.driverData.data.lastName){this.setProgressBarValue(2);}
+      if(this.props.driverData.data.dob){this.setProgressBarValue(3);}
+      if(this.props.driverData.data.gender){this.setProgressBarValue(4);}
+      if(this.props.driverData.data.ssn){this.setProgressBarValue(5);}
+      if(this.props.driverData.data.address){this.setProgressBarValue(6);}
+      if(this.props.driverData.data.licenseNo){this.setProgressBarValue(7);}
+      if(this.props.driverData.data.licenceDate){this.setProgressBarValue(8);}
+      if(this.props.driverData.data.experienceType){this.setProgressBarValue(9);}
+      if(this.props.driverData.data.experienceYear){this.setProgressBarValue(10);}
+      if(this.props.driverData.data.experienceMon){this.setProgressBarValue(11);}
+      if(this.props.driverData.data.imgs.length>0)
+        this.setProgressBarValue(12);
+
+      if(this.props.driverData.data.about){this.setProgressBarValue(13);}
+      //certificates :  (this.props.driverData.data.certificates != null) ? this.props.driverData.data.certificates[0] : "",
+      if(this.props.driverData.data.cities != null){this.setProgressBarValue(14);}
+
+      // states for vehicle information form
+      if(this.props.driverData.data.vechiles.plateNo){this.setProgressBarValue(15);}
+      if(this.props.driverData.data.vechiles.type){this.setProgressBarValue(16);}
+      if(this.props.driverData.data.vechiles.make){this.setProgressBarValue(17);}
+      if(this.props.driverData.data.vechiles.model){this.setProgressBarValue(18);}
+      if(this.props.driverData.data.vechiles.modelYear){this.setProgressBarValue(19);}
+      if(this.props.driverData.data.vechiles.equipment){this.setProgressBarValue(20);}
+      if(this.props.driverData.data.vechiles.capacity){this.setProgressBarValue(21);}
+      if(this.props.driverData.data.vechiles.insuranceNo){this.setProgressBarValue(22);}
+      if(this.props.driverData.data.vechiles.insuranceExp){this.setProgressBarValue(23);}
+      if((this.props.driverData.data.vechiles.imgs.length>0)){this.setProgressBarValue(24);}
+      //if(agreement : ''){this.setProgressBarValue(25);}
+
+      // image states for vehicle information
+      if(this.props.driverData.data.vechiles.license != {} ){this.setProgressBarValue(26);}
+      if(this.props.driverData.data.vechiles.insurance != {} ){this.setProgressBarValue(27);}
+      if(this.props.driverData.data.vechiles.background != {} ){this.setProgressBarValue(28);}
+      if(this.props.driverData.data.vechiles.abstract != {} ){this.setProgressBarValue(29);}
+
+      // image states for vehicle information
+      var _LicenceImage=null;
+      var _InsuranceImage=null;
+      var _Background=null;
+      var _DriverExtract=null;
+
+      // this.props.driverData.data.vechiles.addDocs && this.props.driverData.data.vechiles.addDocs.map((val,i) => {
+      //   if(val.type == "license")
+      //   {
+      //     _LicenceImage={uri:Connection.getMedia() + val.path};
+      //   }
+      //   if(val.type == "background")
+      //   {
+      //     _Background={uri:Connection.getMedia() + val.path};
+      //   }
+      //   if(val.type == "abstract")
+      //   {
+      //     _DriverExtract={uri:Connection.getMedia() + val.path};
+      //   }
+      //   if(val.type == "insurance")
+      //   {
+      //     _InsuranceImage={uri:Connection.getMedia() + val.path};
+      //   }
+      // });
+
+
     this.setState({  gender:Constants.Strings.DropDownItems.gender || this.props.driverData.data.gender,
       yearList:Constants.Strings.DropDownItems.licenceYear,
       monthList:Constants.Strings.DropDownItems.experienceMonth,
       //certificateList:Constants.Strings.DropDownItems.certificates,
       //cityList:Constants.Strings.DropDownItems.citiesServe,
-      experienceList:Constants.Strings.DropDownItems.experienceType,
-      vehicleTypeList:Constants.Strings.DropDownItems.vehicleType,
-      vehicleMakeList:Constants.Strings.DropDownItems.vehicleMake,
-      vehicleModelList:Constants.Strings.DropDownItems.vehicleModel,
-      
+      //experienceTypeList:this.props.experienceTypeList,
+      //experienceList:Constants.Strings.DropDownItems.experienceType,
+      vehicleTypeList:arr1,//Constants.Strings.DropDownItems.vehicleType,
+      //vehicleMakeList:Constants.Strings.DropDownItems.vehicleMake,
+      //vehicleModelList:Constants.Strings.DropDownItems.vehicleModel,
+      capacityList : Constants.Strings.DropDownItems.capacityList,
+
       vehicleYearList:Constants.Strings.DropDownItems.vehicleYear,
       equipmentList:Constants.Strings.DropDownItems.equipment,
       insuranceExpiryList:Constants.Strings.DropDownItems.insuranceExpiryYear,
-      
+
       DriverInfo :this.props.driverInfo,
-     
+
       // states for personal info form
       //avatarSource:Constants.Images.driver.camera,
       avatarSource:(this.props.driverData.data.profile) == null?Constants.Images.driver.camera:{uri:Connection.getMedia()+ this.props.driverData.data.profile},
@@ -201,6 +294,7 @@ if(!this.props.modalstate.NewUserModalVisible) {
       aboutUS : '' || this.props.driverData.data.about,
       //certificates :  (this.props.driverData.data.certificates != null) ? this.props.driverData.data.certificates[0] : "",
       locationServe : (this.props.driverData.data.cities != null) ? this.props.driverData.data.cities[0] : "",
+      cities : (this.props.driverData.data.servingareas != null) ? this.props.driverData.data.servingareas : null,
 
       // states for vehicle information form
       vehicleNo:'' || this.props.driverData.data.vechiles.plateNo,
@@ -209,16 +303,17 @@ if(!this.props.modalstate.NewUserModalVisible) {
       vehicleModel : '' || this.props.driverData.data.vechiles.model,
       year :'' || this.props.driverData.data.vechiles.modelYear,
       equipment : '' || this.props.driverData.data.vechiles.equipment,
+      capacity:'CAPACITY' || this.props.driverData.data.vechiles.capacity,
       insuranceNo : '' || this.props.driverData.data.vechiles.insuranceNo,
       insuranceExpiry :'' || this.props.driverData.data.vechiles.insuranceExp,
       vehicleImages:(this.props.driverData.data.vechiles.imgs.length>0) ? this.props.driverData.data.vechiles.imgs : [],
       agreement : '',
 
       // image states for vehicle information
-      LicenceImage:(this.props.driverData.data.vechiles.license == {} ) ? Constants.Images.driver.circleplus : {uri: Connection.getMedia() + this.props.driverData.data.vechiles.license.path},
-      InsuranceImage:(this.props.driverData.data.vechiles.insurance == {} ) ? Constants.Images.driver.circleplus : {uri:Connection.getMedia() + this.props.driverData.data.vechiles.insurance.path},
-      Background:(this.props.driverData.data.vechiles.background == {} ) ? Constants.Images.driver.circleplus : {uri:Connection.getMedia() + this.props.driverData.data.vechiles.background.path},
-      DriverExtract:(this.props.driverData.data.vechiles.abstract == {} ) ? Constants.Images.driver.circleplus : {uri:Connection.getMedia() + this.props.driverData.data.vechiles.abstract.path},
+      LicenceImage:_LicenceImage,
+      InsuranceImage:_InsuranceImage,
+      Background:_Background,
+      DriverExtract:_DriverExtract,
 
       //confirmation check
       isConfirmed:false,
@@ -227,55 +322,50 @@ if(!this.props.modalstate.NewUserModalVisible) {
       flagPersonal : 1,
       flagVehicle : 0,
 
-      ProgressWidth : 3,
-      ProgressData : 0,
-      OutputText :'0% Complete',
+      //ProgressWidth : 3,
+      //ProgressData : 0,
+      //OutputText :'0% Complete',
       modalVisible:false,
       listItems : [],
 
 
-      genderColor:Constants.Colors.Blue,
-      dobColor:Constants.Colors.Blue,
-      licenceDateColor:Constants.Colors.Blue,
-      licenceYearColor:Constants.Colors.Blue,
-      licenceMonthColor:Constants.Colors.Blue,
-      experienceYearColor:Constants.Colors.Blue,
-      experienceMonthColor:Constants.Colors.Blue,
-      certificatesColor:Constants.Colors.Blue,
-      vehicleTypeColor:Constants.Colors.Blue,
-      makeOfVehicleColor:Constants.Colors.Blue,
-      vehicleModelColor:Constants.Colors.Blue,
-      yearColor:Constants.Colors.Blue,
-      equipmentColor:Constants.Colors.Blue,
-      insuranceExpiryColor:Constants.Colors.Blue,
+      //genderColor:Constants.Colors.BlurGrey,
+      //dobColor:Constants.Colors.BlurGrey,
+      //licenceDateColor:Constants.Colors.BlurGrey,
+      licenceYearColor:Constants.Colors.BlurGrey,
+      licenceMonthColor:Constants.Colors.BlurGrey,
+      experienceYearColor:Constants.Colors.BlurGrey,
+      experienceMonthColor:Constants.Colors.BlurGrey,
+      certificatesColor:Constants.Colors.BlurGrey,
+      vehicleTypeColor:Constants.Colors.BlurGrey,
+      makeOfVehicleColor:Constants.Colors.BlurGrey,
+      vehicleModelColor:Constants.Colors.BlurGrey,
+      yearColor:Constants.Colors.BlurGrey,
+      equipmentColor:Constants.Colors.BlurGrey,
       allFieldsFilled:false,
       token: this.props.driverData.token,
       //not used anywhere
       imgSource:null,
-     
-    })
+      })
+    }
   }
-    //console.log(this.props,"  **** COMPPONENT WILL MOUN")
-  }
+
   componentWillReceiveProps(nextProps){
-    
+
     // this.setState({citiesList:nextProps.citiesList,certificatesList:nextProps.certificatesList});
-    let updatedArr = [];
-    if(this.props.driverData && this.props.driverData.data && this.props.driverData.data.cities.length != 0){
+
+    if(this.props.driverData && this.props.driverData.data &&this.props.driverData.data.servingareas!=null && this.props.driverData.data.servingareas.length != 0){
+      let updatedArr = [];
       console.log('nextProps inside if statement *********** ',nextProps)
-     _.each(this.props.driverData.data.cities,(each)=>{
+     _.each(this.props.driverData.data.servingareas,(each)=>{
         console.log('each element *********** ',each)
         _.each(nextProps.citiesList,(cities)=>{
           console.log('each cities list **********',cities)
-          if(each.cityName == cities.cityName){
+          if(each == cities._id){
             cities.isSelected = true;
           }
-          
             updatedArr.push(cities);
-          // this.setState({
-          //   citiesList:updatedArr
-          // })
-          
+
         })
         console.log('updated array ******* ',updatedArr);
         this.setState({
@@ -283,76 +373,88 @@ if(!this.props.modalstate.NewUserModalVisible) {
         })
       })
     }
-
     else{
       console.log('nextProps inside else  *********** ',nextProps)
       this.setState({
         citiesList: nextProps.citiesList,
-        certificatesList: nextProps.certificatesList
+        certificatesList: nextProps.certificatesList,
       })
     }
-    
-      
-
-
-    // this.setState({
-    //   citiesList:nextProps.citiesList
-    // })
-    //citiesList:props.citiesList,
-  
-    
-
-  }
-componentDidMount(){
-  //console.log("component did mount call",this.props.driverData.data);
- 
-  if( this.props.driverData && this.props.driverData.data  && this.props.driverData.data.cities.length !=0){
-    //console.log("cities list",this.props.driverData.data.cities)
-
-
-
-    // _.each(this.props.driverData.data.cities,(each)=>{
-    //   console.log('each element *********** ',each)
-    //   _.each(this.state.citiesList,(cities)=>{
-    //     console.log('each cities list **********',cities)
-    //     if(each.cityName == cities.cityName){
-    //       cities.isSelected = true;
-    //     }
-    //   })
-    // })
-
-
-
-
-    for(let index in this.props.driverData.data.cities){
-      let selectData= this.props.driverData.data.cities[index];
-
-      for(let inerindex in this.state.citiesList){
-        let activeData= this.state.citiesList[inerindex];
-        if(selectData.cityName == activeData.cityName){
-          this.state.citiesList[inerindex].isSelected = true;
-        }
-      }
+    if(this.props.driverData && this.props.driverData.data && this.props.driverData.data.experienceType!=null && this.props.driverData.data.experienceType.length != 0){
+      let arr1=[];
+      let updatedArr = [];
+      _.each(this.props.driverData.data.experienceType,(each)=>{
+         console.log('each element *********** ',each)
+         _.each(nextProps.experienceTypeList,(experience)=>{
+           console.log('each cities list **********',experience)
+           if(each == experience._id){
+             experience.isSelected = true;
+           }
+             updatedArr.push(experience);
+         })
+         console.log('updated array ******* ',updatedArr);
+         this.setState({
+           experienceTypeList:updatedArr
+         })
+       })
     }
-  }
-
-  if( this.props.driverData && this.props.driverData.data  && this.props.driverData.data.certificates.length !=0){
-    //console.log("certificates list",this.props.driverData.data.certificates)
-    for(let index in this.props.driverData.data.certificates){
-      let selectData= this.props.driverData.data.certificates[index];
-      for(let inerindex in this.state.certificatesList){
-        let activeData= this.state.certificatesList[inerindex];
-        if(selectData.title == activeData.title){
-          this.state.certificatesList[inerindex].isSelected = true;
-       
-        }
-      }
+    else{
+      console.log('nextProps inside else  *********** ',nextProps)
+      this.setState({
+        experienceTypeList:nextProps.experienceTypeList,
+      })
     }
 
   }
 
+  componentDidMount()
+  {
+    if( this.props.driverData && this.props.driverData.data && this.props.driverData.data.servingareas!=null  && this.props.driverData.data.servingareas.length !=0){
+      //console.log("cities list",this.props.driverData.data.cities)
 
-}
+
+
+      // _.each(this.props.driverData.data.cities,(each)=>{
+      //   console.log('each element *********** ',each)
+      //   _.each(this.state.citiesList,(cities)=>{
+      //     console.log('each cities list **********',cities)
+      //     if(each.cityName == cities.cityName){
+      //       cities.isSelected = true;
+      //     }
+      //   })
+      // })
+
+
+
+
+      for(let index in this.props.driverData.data.servingareas){
+        let selectData= this.props.driverData.data.servingareas[index];
+
+        for(let inerindex in this.state.citiesList){
+          let activeData= this.state.citiesList[inerindex];
+          if(selectData == activeData._id){
+            this.state.citiesList[inerindex].isSelected = true;
+          }
+        }
+      }
+    }
+
+    if( this.props.driverData && this.props.driverData.data  &&  this.props.driverData.data.certificates!=null && this.props.driverData.data.certificates.length !=0){
+      //console.log("certificates list",this.props.driverData.data.certificates)
+      for(let index in this.props.driverData.data.certificates){
+        let selectData= this.props.driverData.data.certificates[index];
+        for(let inerindex in this.state.certificatesList){
+          let activeData= this.state.certificatesList[inerindex];
+          if(selectData.title == activeData.title){
+            this.state.certificatesList[inerindex].isSelected = true;
+
+          }
+        }
+      }
+
+    }
+
+  }
 
   /** method to change tab ***/
   onPressInfo(value){
@@ -362,7 +464,9 @@ componentDidMount(){
     }
     else {
       let { dispatch } = this.props.navigation;
-      let checkFieldsValue=this.checkFields()
+        let checkFieldsValue=this.checkFields()
+
+      // alert("checkfield1")
          if(checkFieldsValue === true){
         this.props.UserActions.userDriverForm({...this.state} );
         this.props.navigation.dispatch({type : 'LOAD_DRIVERINFO_PAGE', info : 2});
@@ -385,7 +489,7 @@ componentDidMount(){
   }
 
   /*** method to save rabbit form */
-  onSave(){   
+  onSave(){
       //console.log({...this.state});
      // console.log("cities lis of api",this.state.cities);
       this.props.UserActions.userDriverForm({...this.state});
@@ -397,11 +501,29 @@ componentDidMount(){
     let { dispatch } = this.props.navigation;
     let {avatarSource,firstname,lastName,dob,sex,sin,address,licenceNo,licenceDate,
     experience,experienceYear,experienceMonth,experienceImagesArray,certificates,locationServe} = this.state;
-    if(_.isEmpty(avatarSource)){
-      dispatch(ToastActionsCreators.displayInfo('Upload profile picture'))
-      return false
+    var _sin=sin;
+    var constNumber='121212121';
+    var finalstr=0;
+    if(sin!=null)
+    for (var i = 0; i < sin.length; i++)
+    {
+      var res = parseInt(sin.substr(i, 1)) * parseInt(constNumber.substr(i, 1));
+      if(res < 10)
+      {
+        finalstr = parseInt(finalstr) + parseInt(res);
+      }
+      else {
+        finalstr = parseInt(finalstr) + parseInt(res.toString().substr(0, 1)) + parseInt(res.toString().substr(1, 1));
+      }
     }
-    else if(_.isEmpty(firstname)){
+
+
+    // if(_.isEmpty(avatarSource)){
+    //   dispatch(ToastActionsCreators.displayInfo('Upload profile picture'))
+    //   return false
+    // }
+    // else
+     if(_.isEmpty(firstname)){
       dispatch(ToastActionsCreators.displayInfo('Enter first name'))
       return false
     }
@@ -423,6 +545,11 @@ componentDidMount(){
     }
     else if(this.state.sin.length!=9){
       dispatch(ToastActionsCreators.displayInfo('Please enter nine digits for SIN/SSN'))
+      return false
+    }
+    else if(parseInt(finalstr.toString().substr(finalstr.toString().length-1, 1)) != 0)
+    {
+      dispatch(ToastActionsCreators.displayInfo('Sin is not valid.'))
       return false
     }
     else if(_.isEmpty(address)){
@@ -484,7 +611,7 @@ componentDidMount(){
   checkVehicleInfoFields(){
     let { dispatch } = this.props.navigation;
     let {  vehicleImages,vehicleNo,vehicleType,makeOfVehicle,
-      vehicleModel,year,equipment,insuranceNo,insuranceExpiry,
+      vehicleModel,year,equipment,insuranceNo,insuranceExpiry,capacity,
       LicenceImage,InsuranceImage,Background,DriverExtract,} = this.state;
       //console.log(this.state)
     if(_.isEmpty(vehicleNo)){
@@ -508,7 +635,13 @@ componentDidMount(){
     //   return false
     // }
     else if(_.isEmpty(equipment)){
-      dispatch(ToastActionsCreators.displayInfo('Enter equipment'))
+      ToastAndroid.show('Enter equipment', ToastAndroid.SHORT);
+      // dispatch(ToastActionsCreators.displayInfo('Enter equipment'))
+      return false
+    }
+    else if(_.isEmpty(capacity)){
+      ToastAndroid.show('Enter capacity', ToastAndroid.SHORT);
+      // dispatch(ToastActionsCreators.displayInfo('Enter capacity'))
       return false
     }
     else if(_.isEmpty(insuranceNo)){
@@ -573,8 +706,14 @@ componentDidMount(){
   }
 
   /**** set progress bar value ***/
-  setProgressBarValue(){
-      var length = this.state.ProgressData + 1;
+  setProgressBarValue(index){
+      ProgressBarArray[index]=1;
+      var length=0;
+      for(var i=0;i<ProgressBarArray.length;i++)
+      {
+        length = length + ProgressBarArray[i];
+      }
+      //var length = this.state.ProgressData + 1;
       var percentage = ((100 * length) / 30) | 0;
       const text = `${percentage}% Completed `;
       var widthPr=(percentage*2.4);
@@ -585,15 +724,21 @@ componentDidMount(){
   // {
   //     this.setState({modalVisible:true,listItems : Constants.Strings.DropDownItems.gender, genderColor : Constants.Colors.Blue});
   // }
-  // setdob()
-  // {
-  //     this.setState({dobColor : Constants.Colors.Blue});
-  // }
+   setdob(date)
+   {
+       this.setState({dob:date,dobColor : Constants.Colors.Blue});
+       this.setProgressBarValue(3);
+   }
+   setExpiry(date)
+   {
+       this.setState({licenceDate:date,licenceDateColor : Constants.Colors.Blue});
+       this.setProgressBarValue(8);
+   }
   // yearOfVehicle()
   // {
   //   //this.setState({yearColor : Constants.Colors.Blue});
   //   //this.setState({modalVisible:true,listItems : Constants.Strings.DropDownItems.equipment, equipmentColor : Constants.Colors.Blue});
-    
+
   //   this.setState({modalVisible:true,listItems : Constants.Strings.DropDownItems.vehicleYear, yearColor : Constants.Colors.Blue});
   // }
   // insuranceExpiry()
@@ -705,7 +850,7 @@ componentDidMount(){
 // }
 
 /*** method to open iamge picker and set image ***/
-openImagePicker(image_type) {
+openImagePicker(image_type,progressIndex) {
 
   const options = {
     quality: 1.0,
@@ -715,7 +860,7 @@ openImagePicker(image_type) {
       skipBackup: true
     }
   };
-  let arrImg = []; 
+  let arrImg = [];
   ImagePicker.showImagePicker(options, response => {
     console.log("Response = ", response);
 
@@ -730,7 +875,7 @@ openImagePicker(image_type) {
     }
     else {
       let source = { uri: response.uri , fileName: response.fileName, type: response.type};
-
+      this.setProgressBarValue(progressIndex);
       switch(image_type){
         case 'profile':
           this.setState({avatarSource: source})
@@ -754,11 +899,6 @@ openImagePicker(image_type) {
 
       }
 
-        //console.log('arrraaayyyyy vehicle docs ******** ', this.state.imageType)
-
-        //arrImg.push(source);
-       // this.setState({vehicleDocs: source})
-
       }
   });
 }
@@ -773,6 +913,34 @@ openImagePicker(image_type) {
 //     </TouchableOpacity>
 //   )
 // }
+
+cropImage(){
+  // alert("image"+ImageCropPicker)
+    ImageCropPicker.openPicker({
+      height: parseInt(Constants.BaseStyle.DEVICE_HEIGHT / 100 * 5),
+      width: parseInt(Constants.BaseStyle.DEVICE_WIDTH / 100 * 5),
+      cropping: true
+    }).then(response => {
+      let source = { uri: response.path , fileName: response.path, type: response.mime};
+      this.setProgressBarValue(1);
+      this.setState({avatarSource: source,isVisible:false});
+
+    });
+  }
+
+  cropCameraPic()
+  {
+    ImagePicker.openCamera({
+        height: parseInt(Constants.BaseStyle.DEVICE_HEIGHT / 100 * 5),
+        width: parseInt(Constants.BaseStyle.DEVICE_WIDTH / 100 * 5),
+        cropping: true
+      }).then(response => {
+        let source = { uri: response.path , fileName: response.path, type: response.mime};
+        this.setProgressBarValue(1);
+        this.setState({avatarSource: source,isVisible:false});
+
+      });
+  }
 
   renderVehicleImages() {
     const options = {
@@ -808,8 +976,7 @@ openImagePicker(image_type) {
         arrImg.push(source);
 
         this.setState({imgSourceVehicle: arrImg})
-
-        //console.log(" image source  ***********  ", source);
+        this.setProgressBarValue(25);
 
       }
     });
@@ -848,7 +1015,7 @@ openImagePicker(image_type) {
         arrImg.push(source);
 
         this.setState({imgSourceExperience: arrImg})
-
+        this.setProgressBarValue(12);
         //console.log(" image source  ***********  ", arrImg);
 
       }
@@ -857,75 +1024,102 @@ openImagePicker(image_type) {
 
   /*** select gender from drop down */
   selectGender(sex){
-    this.setState({sex})
-    this.setProgressBarValue()
+    this.setState({sex:sex, genderColor : Constants.Colors.Blue})
+    this.setProgressBarValue(4)
+  }
+
+  selectSin(sin)
+  {
+    this.setState({sin:sin, sinColor : Constants.Colors.Blue})
   }
 
   /*** select experience type from drop down */
-  selectExperience(experience){
+  /*selectExperience(experience){
     this.setState({experience})
-    this.setProgressBarValue()
-  }
+    this.setProgressBarValue(9)
+  }*/
 
   /*** select experience year from drop down */
   selectExperienceYear(experienceYear){
     //console.log(experienceYear,'experienceYear&&&&&&&&&&&')
     this.setState({experienceYear})
-    this.setProgressBarValue()
+    this.setProgressBarValue(10)
   }
 
   /*** select experience month from drop down */
   selectExperienceMonth(experienceMonth){
     this.setState({experienceMonth})
-    this.setProgressBarValue()
-  }
-
-  /*** select certificate from drop down */
-  // selectCertificates(certificates){
-  //   this.setState({certificates})
-  //   this.setProgressBarValue()
-  // }
-
-  /*** select location serving city from drop down */
-  selectLocationServe(locationServe){
-    this.setState({locationServe})
-    this.setProgressBarValue()
+    this.setProgressBarValue(11)
   }
 
    /*** select vehicle type from drop down */
-  selectVehicleType(vehicleType){
-   this.setState({vehicleType})
-    this.setProgressBarValue()
+  selectVehicleType(text){
+
+   this.setState({vehicleType:text});
+   /*this.state.vehicleTypeList.map((val,i) => {
+     if(val.value == text)
+     {
+       this.props.UserActions.getMakeOfVehicleList(val.tagid);
+
+     }
+   });*/
+    this.setProgressBarValue(17);
   }
 
    /*** select make of vehicle from drop down */
   selectMakeOfVehicle(makeOfVehicle){
-    this.setState({makeOfVehicle})
-     this.setProgressBarValue()
+    this.setState({makeOfVehicle});
+    var vehicleid='';
+    console.log("vehicleTypeList",this.state.vehicleTypeList)
+    this.state.vehicleTypeList.map((val,i) => {
+      if(val.value == this.state.vehicleType)
+      {
+        vehicleid = val.tagid;
+      }
+    });
+
+    this.props.vehicleMakeList.map((val,i) => {
+      if(val.value == makeOfVehicle)
+      {
+        this.props.UserActions.getVehicleModalList(vehicleid,val.tagid);
+      }
+    });
+     this.setProgressBarValue(18);
   }
 
   /*** select vehicle model from drop down */
   selectVehicleModel(vehicleModel){
     this.setState({vehicleModel})
-    this.setProgressBarValue()
+    this.props.vehicleModelList.map((val,i) => {
+      if(val.value == vehicleModel)
+      {
+        var arr1=val.room;
+        arr1.map((obj,b) => {
+          this.setState({room : obj.name});
+        });
+
+        //this.props.UserActions.getVehicleModalList(vehicleid,val.tagid);
+      }
+    });
+    this.setProgressBarValue(19);
   }
 
   /*** select vehicle year from drop down */
   selectVehicleYear(year){
     this.setState({year})
-    this.setProgressBarValue()
+    this.setProgressBarValue(20)
   }
 
-   /*** select equipment from drop down */
-  selectEquipment(equipment){
-    this.setState({equipment})
-    this.setProgressBarValue()
-  }
+  /*** select capacity from drop down */
+ selectCapacity(capacity){
+   this.setState({capacity})
+   this.setProgressBarValue(21)
+ }
 
    /*** select insurance expiry from drop down */
   selectInsuranceExpiry(insuranceExpiry){
     this.setState({insuranceExpiry})
-    this.setProgressBarValue()
+    this.setProgressBarValue(24)
   }
 
 /***  selected cities */
@@ -938,44 +1132,139 @@ openImagePicker(image_type) {
       if (~index) citiesList[index].isSelected = true;
       else continue;
     }
-   
-    this.setState({citiesList: citiesList});
 
-    this.state.cities.length =0;
+    this.setState({citiesList: citiesList,cities:[]});
+
+    /*this.state.cities.length =0;
     for(let index in this.state.citiesList){
       let activeData= this.state.citiesList[index];
-      //console.log("cities data",activeData)
 
       if(activeData.isSelected){
         this.state.cities.push(activeData)
       }
-    }
-    // this.setState({citiesList: citiesList},()=>{
-    //   this.setState({cities:this.state.citiesList});
-    //   console.log("cities new add **************",this.state.cities)
-    // });
+    }*/
+    var arr1=[];
+    for(let index in this.state.citiesList){
+      let activeData= this.state.citiesList[index];
 
-   
+      if(activeData.isSelected){
+        arr1.push(activeData)
+      }
+    }
+    this.setState({cities:arr1});
+    this.setProgressBarValue(15);
   }
 
-  
+
   deleteItem=(item)=> {
     // this.setState({markerLatLng:[]});
      let {citiesList} = this.state;
      let index = citiesList.findIndex(a => a === item);
      this.state.citiesList[index].isSelected = false;
-     this.setState({citiesList: citiesList});
+     this.setState({citiesList: citiesList,cities : []});
 
-     this.state.cities.length =0;
+     var arr1=[];
      for(let index in this.state.citiesList){
        let activeData= this.state.citiesList[index];
-       //console.log("cities data",activeData)
- 
+
+       if(activeData.isSelected){
+         arr1.push(activeData)
+       }
+     }
+     this.setState({cities:arr1});
+
+     /*this.state.cities.length =0;
+     for(let index in this.state.citiesList){
+       let activeData= this.state.citiesList[index];
        if(activeData.isSelected){
          this.state.cities.push(activeData)
        }
-     }
+     }*/
     }
+
+  /***  selected equipment */
+  selectConfirmEquipment=(list) =>{
+    let {equipmentList} = this.state;
+
+   // this.setState({markerLatLng:[]});
+    for (let item of list) {
+      let index = equipmentList.findIndex(ele => ele === item);
+      if (~index) equipmentList[index].isSelected = true;
+      else continue;
+    }
+
+    this.setState({equipmentList: equipmentList,equipment:null});
+
+    //this.state.equipment.length =0;
+    var arr1=[];
+    for(let index in this.state.equipmentList){
+      let activeData= this.state.equipmentList[index];
+
+      if(activeData.isSelected){
+        arr1.push(activeData)
+      }
+    }
+    this.setState({equipment:arr1});
+    this.setProgressBarValue(22);
+  }
+
+  deleteEquipmentItem=(item)=> {
+    // this.setState({markerLatLng:[]});
+     let {equipmentList} = this.state;
+     let index = equipmentList.findIndex(a => a === item);
+     this.state.equipmentList[index].isSelected = false;
+     this.setState({equipmentList: equipmentList,equipment:null});
+
+     var arr1=[];
+     for(let index in this.state.equipmentList){
+       let activeData= this.state.equipmentList[index];
+
+       if(activeData.isSelected){
+         arr1.push(activeData)
+       }
+     }
+     this.setState({equipment:arr1});
+    }
+
+selectExperience=(list) =>{
+  let {experienceTypeList} = this.state;
+
+  for (let item of list) {
+    let index = experienceTypeList.findIndex(ele => ele === item);
+    if (~index) experienceTypeList[index].isSelected = true;
+    else continue;
+  }
+
+  this.setState({experienceTypeList: experienceTypeList,experience:null});
+  var arr1=[];
+  for(let index in this.state.experienceTypeList){
+    let activeData= this.state.experienceTypeList[index];
+
+    if(activeData.isSelected){
+      arr1.push(activeData)
+    }
+  }
+  this.setState({experience:arr1});
+  this.setProgressBarValue(9);
+}
+
+deleteExperienceItem=(item)=> {
+ // this.setState({markerLatLng:[]});
+  let {experienceTypeList} = this.state;
+  let index = experienceTypeList.findIndex(a => a === item);
+  this.state.experienceTypeList[index].isSelected = false;
+  this.setState({experienceTypeList: experienceTypeList,experience:null});
+  var arr1=[];
+  for(let index in this.state.experienceTypeList){
+    let activeData= this.state.experienceTypeList[index];
+
+    if(activeData.isSelected){
+      arr1.push(activeData)
+    }
+  }
+  this.setState({experience:arr1});
+  this.setProgressBarValue(9);
+}
 
 
 
@@ -990,7 +1279,7 @@ selectCertificates=(list) =>{
       if (~index) certificatesList[index].isSelected = true;
       else continue;
     }
-   
+
     this.setState({certificatesList: certificatesList});
 
     this.state.certificates.length =0;
@@ -1002,38 +1291,28 @@ selectCertificates=(list) =>{
         this.state.certificates.push(activeData)
       }
     }
-    // this.setState({citiesList: citiesList},()=>{
-    //   this.setState({cities:this.state.citiesList});
-    //   console.log("cities new add **************",this.state.cities)
-    // });
+    this.setProgressBarValue(14);
 
-   
+
   }
-     deleteCertificateItem=(item)=> {
-      // this.setState({markerLatLng:[]});
-       let {certificatesList} = this.state;
-       let index = certificatesList.findIndex(a => a === item);
-       this.state.certificatesList[index].isSelected = false;
-       this.setState({certificatesList: certificatesList});
-  
-       this.state.certificates.length =0;
-       for(let index in this.state.certificatesList){
-         let activeData= this.state.certificatesList[index];
-         //console.log("certificates data",activeData)
-   
-         if(activeData.isSelected){
-           this.state.certificates.push(activeData)
-         }
+ deleteCertificateItem=(item)=> {
+    // this.setState({markerLatLng:[]});
+     let {certificatesList} = this.state;
+     let index = certificatesList.findIndex(a => a === item);
+     this.state.certificatesList[index].isSelected = false;
+     this.setState({certificatesList: certificatesList});
+
+     this.state.certificates.length =0;
+     for(let index in this.state.certificatesList){
+       let activeData= this.state.certificatesList[index];
+       //console.log("certificates data",activeData)
+
+       if(activeData.isSelected){
+         this.state.certificates.push(activeData)
        }
-  
+     }
+}
 
-
-    //  this.setState({citiesList: citiesList},()=>{
-    //   this.setState({cities:this.state.citiesList});
-    //   console.log("cities data delete **************",this.state.cities)
-    // });
-      }
- 
 
   render() {
    // console.log("certificatesList status **************************************",this.props.certificatesList)
@@ -1049,27 +1328,32 @@ selectCertificates=(list) =>{
                       <Text  style={styles.TopHeaderText}>
                       {'DRIVER FORM'}
                       </Text>
+                      <View  style={[styles.TopHeadRight]}>
+                          <TouchableOpacity onPress={() => console.log('hello')}>
+                            <Image source={Constants.Images.user.setting} style={styles.Sidelogo} resizeMode={'contain'} />
+                          </TouchableOpacity>
+                      </View>
                     </View>
 
-                  <View>
+                    <View>
 
-                  <View style={styles.flexRow}>
-                    <TouchableOpacity onPress={() => this.onPressInfo(1)} underlayColor='#fee989' style={styles.colIndex}>
-                      <Text style={this.setTextColorOnFocus(this.state.flagPersonal)}>{'Personal information'}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => this.onPressInfo(2)} underlayColor='#fee989' style={styles.colIndex}>
-                      <Text style={this.setTextColorOnFocus(this.state.flagVehicle)}>{'Vehicle Information'}</Text>
-                    </TouchableOpacity>
+                    <View style={styles.flexRow}>
+                      <TouchableOpacity onPress={() => this.onPressInfo(1)} underlayColor='#fee989' style={styles.colIndex}>
+                        <Text style={this.setTextColorOnFocus(this.state.flagPersonal)}>{'Personal information'}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => this.onPressInfo(2)} underlayColor='#fee989' style={styles.colIndex}>
+                        <Text style={this.setTextColorOnFocus(this.state.flagVehicle)}>{'Vehicle Information'}</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={[styles.completePercent]}>
+                      <View style={styles.progressLineWrap}>
+                        <View style={[styles.progressLine,{width:this.state.ProgressWidth}]}/>
+                      </View>
+
+                      <Text style={styles.progressText}>{this.state.OutputText}</Text>
+                    </View>
                   </View>
-
-                  {/*<View style={[styles.completePercent]}>
-                    <View style={styles.progressLineWrap}>
-                      <View style={[styles.progressLine,{width:this.state.ProgressWidth}]}/>
-                    </View>
-
-                    <Text style={styles.progressText}>{this.state.OutputText}</Text>
-                </View>*/}
-                </View>
 
                 { this.state.DriverInfo == 1 ?
                     this.renderPersonalInfoForm()
@@ -1097,12 +1381,12 @@ selectCertificates=(list) =>{
                   <DriverFormReject navigation={this.props.navigation} dispatch={this.props.navigation} />
                 </Modal>
 
-                </View> 
-                : 
+                </View>
+                :
                 <Modal animationType={"fade"} transparent={true} visible={newUserVisibilityDialog} onRequestClose={() => {this.props.navigation.dispatch({type:'NEWUSER_VISIBILITY',visibility:false})}}>
                   <NewUserDialog navigation={this.props.navigation} />
                 </Modal>
-}         
+ }
             </ScrollView>
             </View>
     );
@@ -1111,19 +1395,19 @@ selectCertificates=(list) =>{
   renderPersonalInfoForm(){
     return(
       <ScrollView keyboardDismissMode={(Platform.OS === 'ios') ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="always">
-          
+
           <View>
             <View  style={[styles.container]}>
-              
+
               <View style={{ marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5, marginBottom:10}}>
                 <Text style={[{color:Constants.Colors.Blue, fontSize:12}]}>
                 {'We are pleased to welcome you to Delgate as a "Delgate Rabbit". Please fill out the form and submit it for review. The below requested info is private and will be held confidential.'}
                 </Text>
               </View>
-      
+
               <View style={[{marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
                 <Text style={{color:Constants.Colors.Blue,marginTop:Constants.BaseStyle.DEVICE_HEIGHT/100 * .4}}>Profile Picture</Text>
-                  <TouchableOpacity style={styles.ImageBorder} onPress={() => this.openImagePicker('profile')}>
+                  <TouchableOpacity style={styles.ImageBorder} onPress={() => this.setState({isVisible:true})/*('profile',1)*/}>
                   <Image style={styles.insideCamera} source={this.state.avatarSource}  resizeMode={'contain'} />
                   </TouchableOpacity>
               </View>
@@ -1134,7 +1418,8 @@ selectCertificates=(list) =>{
                     autoFocus={false}
                     ref='firstname'
                     placeHolderText={Constants.Strings.driverPersonal.firstname}
-                    placeHolderColor={Constants.Colors.Blue}
+                    placeHolderColor={Constants.Colors.BlurGrey}
+                    focusColor={Constants.Colors.Blue}
                     value={this.state.firstname}
                     style = {[styles.inputTextViewStyle,{marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginHorizontal:0,marginRight:10}]}
                     inputStyle={styles.inputStyle}
@@ -1142,7 +1427,7 @@ selectCertificates=(list) =>{
                     isPassword={false}
                     showPassword={false}
                     onChangeText={(firstname)=>this.setState({firstname})}
-                    onBlur={() => {this.setProgressBarValue()}}
+                    onBlur={() => {this.setProgressBarValue(1)}}
                     />
                 </View>
                 <View style={styles.colIndex}>
@@ -1150,7 +1435,8 @@ selectCertificates=(list) =>{
                     autoFocus={false}
                     ref='lastname'
                     placeHolderText={Constants.Strings.driverPersonal.lastname}
-                    placeHolderColor={Constants.Colors.Blue}
+                    placeHolderColor={Constants.Colors.BlurGrey}
+                    focusColor={Constants.Colors.Blue}
                     value={this.state.lastname}
                     style = {[styles.inputTextViewStyle,{marginRight:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginHorizontal:0,marginLeft:10}]}
                     inputStyle={[styles.inputStyle]}
@@ -1158,7 +1444,7 @@ selectCertificates=(list) =>{
                     isPassword={false}
                     showPassword={false}
                     onChangeText={(lastname)=>this.setState({lastname})}
-                    onBlur={() => {this.setProgressBarValue()}}
+                    onBlur={() => {this.setProgressBarValue(2)}}
                     />
                 </View>
               </View>
@@ -1168,10 +1454,10 @@ selectCertificates=(list) =>{
                   style={{flex:1}}
                   date={this.state.dob}
                   mode="date"
-                  placeholder={"DATE OF BIRTH*"}
+                  placeholder={"BIRTH DATE"}
                   format="YYYY-MM-DD"
                   minDate="1950-05-01"
-                  maxDate={currentDate}
+                  maxDate={dateOfbirth}
                   confirmBtnText="Confirm"
                   cancelBtnText="Cancel"
                   iconSource={Constants.Images.driver.calendar}
@@ -1182,42 +1468,44 @@ selectCertificates=(list) =>{
                   dateText:{color:this.state.dobColor}
                   // ... You can check the source to find the other keys.
                   }}
-                  onDateChange={(date) => {this.setState({dob: date})}}
+                  onDateChange={(date) => {this.setdob(date)/*this.setState({dob: date})*/}}
                   />
 
                   <Dropdown
-                  containerStyle={{flex:1,marginTop:-20,marginRight:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginHorizontal:0,marginLeft:30}}
-                  textColor ={Constants.Colors.Blue}
-                  baseColor ={Constants.Colors.Blue}
-                  value={this.state.sex||'GENDER'}
-                  fontSize={14}
-                  data={this.state.gender}
-                  onChangeText={(sex)=>{this.selectGender(sex)}}
-                  />
+                    containerStyle={{flex:1,marginTop:-20,marginRight:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginHorizontal:0,marginLeft:30}}
+                    textColor ={this.state.genderColor}
+                    baseColor ={Constants.Colors.Blue}
+                    value={this.state.sex||'GENDER'}
+                    fontSize={14}
+                    data={this.state.gender}
+                    onChangeText={(sex)=>{this.selectGender(sex)}}
+                    />
               </View>
-      
+
                 <FormTextInput
-                autoFocus={false}
-                ref='sin'
-                placeHolderText={Constants.Strings.driverPersonal.sin}
-                placeHolderColor={Constants.Colors.Blue}
-                style = {styles.inputTextViewStyle}
-                inputStyle={styles.inputStyle}
-                value={this.state.sin}
-                keyboardType="numeric"
-                secureText={false}
-                isPassword={false}
-                showPassword={false}
-                maxLength = {9}
-                onChangeText={(sin)=>this.setState({sin})}
-                onBlur={() => {this.setProgressBarValue()}}
-                />
+                  autoFocus={false}
+                  ref='sin'
+                  placeHolderText={Constants.Strings.driverPersonal.sin}
+                  placeHolderColor={Constants.Colors.BlurGrey}
+                  focusColor={Constants.Colors.Blue}
+                  style = {styles.inputTextViewStyle}
+                  inputStyle={styles.inputStyle}
+                  value={this.state.sin}
+                  keyboardType="numeric"
+                  secureText={false}
+                  isPassword={false}
+                  showPassword={false}
+                  maxLength = {9}
+                  onChangeText={(sin)=>this.setState({sin})}
+                  onBlur={() => {this.setProgressBarValue(5)}}
+                  />
 
                 <FormTextInput
                 autoFocus={false}
                 ref='address'
                 placeHolderText={Constants.Strings.driverPersonal.address}
-                placeHolderColor={Constants.Colors.Blue}
+                placeHolderColor={Constants.Colors.BlurGrey}
+                focusColor={Constants.Colors.Blue}
                 value={this.state.address}
                 style = {styles.inputTextViewStyle}
                 inputStyle={styles.inputStyle}
@@ -1225,17 +1513,18 @@ selectCertificates=(list) =>{
                 isPassword={false}
                 showPassword={false}
                 onChangeText={(address)=>this.setState({address})}
-                onBlur={() => {this.setProgressBarValue()}}
+                onBlur={() => {this.setProgressBarValue(6)}}
                 />
 
               <View style={styles.flexRow}>
                   <View style={styles.colIndex}>
                     <FormTextInput
-                    
+
                     autoFocus={false}
                     ref='licenceNo'
                     placeHolderText={Constants.Strings.driverPersonal.licenceNo}
-                    placeHolderColor={Constants.Colors.Blue}
+                    placeHolderColor={Constants.Colors.BlurGrey}
+                    focusColor={Constants.Colors.Blue}
                     value={this.state.licenceNo}
                     style = {[styles.inputTextViewStyle,{marginHorizontal:0,marginLeft: (Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginRight:10}]}
                     inputStyle={[styles.inputStyle,{top:5}]}
@@ -1243,75 +1532,101 @@ selectCertificates=(list) =>{
                     isPassword={false}
                     showPassword={false}
                     onChangeText={(licenceNo)=>this.setState({licenceNo})}
-                    onBlur={() => {this.setProgressBarValue()}}
+                    onBlur={() => {this.setProgressBarValue(7)}}
                     />
                   </View>
-                  
+
                   <DatePicker
-                  style={{flex:1  , marginTop: 11}}
-                  date={this.state.licenceDate}
-                  mode="date"
-                  placeholder="EXPIRY DATE"
-                  format="YYYY-MM-DD"
-                  minDate={currentDate}
-                  maxDate={futureDate}
-                  confirmBtnText="Confirm"
-                  cancelBtnText="Cancel"
-                  iconSource={Constants.Images.driver.calendar}
-                  customStyles={{
-                  dateIcon: [styles.rowIcon,{tintColor:this.state.licenceDateColor}],
-                  dateInput:[styles.rowLeft,{borderBottomColor:this.state.licenceDateColor}],
-                  placeholderText:{color:this.state.licenceDateColor},
-                  dateText:{color:this.state.licenceDateColor}
-                  // ... You can check the source to find the other keys.
-                  }}
-                  onDateChange={(date) => {this.setState({licenceDate: date})}}
-                  />
+                    style={{flex:1  , marginTop: 11}}
+                    date={this.state.licenceDate}
+                    mode="date"
+                    placeholder="EXPIRY DATE"
+                    format="YYYY-MM-DD"
+                    minDate={currentDate}
+                    maxDate={futureDate}
+                    confirmBtnText="Confirm"
+                    cancelBtnText="Cancel"
+                    iconSource={Constants.Images.driver.calendar}
+                    customStyles={{
+                    dateIcon: [styles.rowIcon,{tintColor:this.state.licenceDateColor}],
+                    dateInput:[styles.rowLeft,{borderBottomColor:this.state.licenceDateColor}],
+                    placeholderText:{color:this.state.licenceDateColor},
+                    dateText:{color:this.state.licenceDateColor}
+                    // ... You can check the source to find the other keys.
+                    }}
+                    onDateChange={(date) => {this.setExpiry(date)}}
+                    />
               </View>
-      
-              <View style={styles.flexRow}>
-                <View style={[styles.colIndex,{flex : 0.5}]}>
-                  <Dropdown
-                  containerStyle={{marginTop:-10,marginLeft:20}}
-                  textColor ={Constants.Colors.Blue}
-                  baseColor ={Constants.Colors.Blue}
-                  value={this.state.experience||'EXPERIENCE TYPE'}
-                  fontSize={14}
-                  data={this.state.experienceList}
-                  onChangeText={(experience)=>{this.selectExperience(experience)}}
-                  />
+
+              <Text style={[{textAlign:'left',marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100,color:Constants.Colors.Blue,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
+              {Constants.Strings.driverPersonal.experience}
+              </Text>
+             <View>
+                  <LabelSelect
+                    title="Select Experience"
+                    ref="select"
+                    style={styles.labelSelect}
+                    onConfirm={this.selectExperience}
+                  >
+                    {this.state.experienceTypeList && this.state.experienceTypeList.filter(item => item.isSelected).map((item, index) =>
+                      <LabelSelect.Label
+                        key={'label-' + index}
+                        data={item}
+                        onCancel={() => {this.deleteExperienceItem(item);}}
+                      >{item.name}</LabelSelect.Label>
+                    )}
+                    {this.state.experienceTypeList && this.state.experienceTypeList.filter(item => !item.isSelected).map((item, index) =>
+                      <LabelSelect.ModalItem
+                        key={'modal-item-' + index}
+                        data={item}
+                      >{item.name}</LabelSelect.ModalItem>
+                    )}
+                  </LabelSelect>
                 </View>
 
+              <View style={styles.flexRow}>
+                {/*<View style={[styles.colIndex,{flex : 0.5}]}>
+                  <Dropdown
+                    containerStyle={{marginTop:-10,marginLeft:20}}
+                    textColor ={Constants.Colors.Blue}
+                    baseColor ={Constants.Colors.Blue}
+                    value={this.state.experience||'EXPERIENCE TYPE'}
+                    fontSize={14}
+                    data={this.state.experienceTypeList}
+                    onChangeText={(experience)=>{this.selectExperience(experience)}}
+                    />
+                </View>*/}
+
                 <Dropdown
-                containerStyle={{flex: 0.25,marginTop:-10,marginHorizontal:10}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={this.state.experienceYear||'YEAR'}
-                fontSize={14}
-                data={this.state.yearList}
-                onChangeText={(experienceYear)=>{this.selectExperienceYear(experienceYear)}}
-                />
-      
+                  containerStyle={{flex: 0.5,marginTop:-10,marginHorizontal:10}}
+                  textColor ={Constants.Colors.Blue}
+                  baseColor ={Constants.Colors.Blue}
+                  value={this.state.experienceYear||'YEAR'}
+                  fontSize={14}
+                  data={this.state.yearList}
+                  onChangeText={(experienceYear)=>{this.selectExperienceYear(experienceYear)}}
+                  />
+
                 <Dropdown
-                containerStyle={{flex: 0.25,marginTop:-10,marginHorizontal:10}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={this.state.experienceMonth||'MONTH'}
-                fontSize={14}
-                data={this.state.monthList}
-                onChangeText={(experienceMonth)=>{this.selectExperienceMonth(experienceMonth)}}
-                />
-      
+                  containerStyle={{flex: 0.5,marginTop:-10,marginHorizontal:10}}
+                  textColor ={Constants.Colors.Blue}
+                  baseColor ={Constants.Colors.Blue}
+                  value={this.state.experienceMonth||'MONTH'}
+                  fontSize={14}
+                  data={this.state.monthList}
+                  onChangeText={(experienceMonth)=>{this.selectExperienceMonth(experienceMonth)}}
+                  />
+
               </View>
-      
+
               <View style={[{marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
                 <Text style={[{color:Constants.Colors.Blue,marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100}]}>
                 {Constants.Strings.driverPersonal.jobExperience}
                 </Text>
-                  
+
                 <View style={styles.gallaryImagesView}>
-                  
-                  
+
+
                 {this.props.driverData && this.props.driverData.data.imgs.length != 0 ?
                     this.props.driverData.data.imgs.map((each, index) => {
                       // console.log('each vehicle images ****** ',each)
@@ -1338,39 +1653,32 @@ selectCertificates=(list) =>{
                       );
                     })
 
-                  } 
-               
+                  }
+
                   <TouchableOpacity style={styles.cameraImages} onPress={() => this.renderExperienceImages()}>
                     <Image source={Constants.Images.driver.circleplus} style={styles.insideCamera}  resizeMode={'contain'} />
                   </TouchableOpacity>
                 </View>
-      
+
                 <Text style={[{color:Constants.Colors.Blue,marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100}]}>
                   {Constants.Strings.driverPersonal.aboutUS}
                 </Text>
               </View>
-      
-              <TextInput
-              underlineColorAndroid="transparent"
-              multiline={true}
-              maxLength={250}
-              value={this.state.aboutUS}
-              placeholderTextColor={this.state.focusColor}
-              onChangeText={(aboutUS)=>this.setState({aboutUS})}
-              onBlur={() => {this.setProgressBarValue()}}
-              style={[{height : 60,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,borderWidth : 1,borderColor:Constants.Colors.Blue,color : Constants.Colors.Blue}]}
-              />
-      
-              {/* <Dropdown
-              containerStyle={{flex: 0.25,marginTop:-20,marginHorizontal:15}}
-              textColor ={Constants.Colors.Blue}
-              baseColor ={Constants.Colors.Blue}
-              value={this.state.certificates||Constants.Strings.driverPersonal.certificates}
-              data={this.state.certificateList}
-              fontSize={14}
-              onChangeText={(certificates)=>{this.selectCertificates(certificates)}}
-              /> */}
 
+              <TextInput
+                underlineColorAndroid="transparent"
+                multiline={true}
+                maxLength={250}
+                value={this.state.aboutUS}
+                placeholderTextColor={this.state.focusColor}
+                onChangeText={(aboutUS)=>this.setState({aboutUS})}
+                onBlur={() => {this.setProgressBarValue(13)}}
+                style={[{height : 60,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,borderWidth : 1,borderColor:Constants.Colors.Blue,color : Constants.Colors.Blue}]}
+                />
+
+              <Text style={[{textAlign:'left',marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100,color:Constants.Colors.Blue,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
+              {Constants.Strings.driverPersonal.certificates}
+              </Text>
              <View>
                   <LabelSelect
                     title="Select Certificates"
@@ -1394,20 +1702,9 @@ selectCertificates=(list) =>{
                   </LabelSelect>
                 </View>
 
-
-
-
-      
-              {/* <Dropdown
-              containerStyle={{flex: 0.25,marginTop:-20,marginHorizontal:15}}
-              textColor ={Constants.Colors.Blue}
-              baseColor ={Constants.Colors.Blue}
-              value={ this.state.locationServe||Constants.Strings.driverPersonal.locationServe}
-              data={this.state.cityList}
-              fontSize={14}
-              onChangeText={(locationServe)=>{this.selectLocationServe(locationServe)}}
-              /> */}
-
+              <Text style={[{textAlign:'left',color:Constants.Colors.Blue,marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
+              {Constants.Strings.driverPersonal.locationServe}
+              </Text>
                <View>
                   <LabelSelect
                     title="Select Cities"
@@ -1430,11 +1727,11 @@ selectCertificates=(list) =>{
                     )}
                   </LabelSelect>
                 </View>
-      
+
               <Text style={[{textAlign:'center',color:Constants.Colors.Blue,fontSize:12}]}>
               {Constants.Strings.driverPersonal.notes}
               </Text>
-      
+
               <View style={[styles.flexRow,{marginBottom:10}]}>
                 <View style={[styles.colIndex,{flex : 0.5}]}>
                   <SubmitButton
@@ -1459,27 +1756,62 @@ selectCertificates=(list) =>{
             </View>
           </View>
 
+          <Modal animationType={"fade"} transparent={true} visible={this.state.isVisible} onRequestClose={() => {this.setState({isVisible:false})}}>
+          <View  style={[styles.modalOuter]}>
+            <View style={[styles.modalInner,{width:Constants.BaseStyle.DEVICE_WIDTH/100 * 80,borderRadius:10,padding:0}]}>
+
+
+              <View>
+               <View style={{justifyContent:'center',marginBottom: Constants.BaseStyle.DEVICE_WIDTH*1/100,}}>
+                 <Text style={{fontWeight:'900',fontSize:16,marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*3,marginVertical: Constants.BaseStyle.DEVICE_WIDTH*2/100,}}>{'Select A Photo'}</Text>
+                 <TouchableOpacity onPress={() => this.cropCameraPic()}>
+                    <Text style={{fontSize:16,marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*3,marginBottom: Constants.BaseStyle.DEVICE_WIDTH*2/100,}}>{'Take a Photo..'}</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => this.cropImage()}>
+                    <Text style={{fontSize:16,marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*3}}>{'Select from Library..'}</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => {this.setState({isVisible:false})}}>
+                    <Text style={{fontSize:16,color : Constants.Colors.Blue,textAlign:'right',marginRight:(Constants.BaseStyle.DEVICE_WIDTH/100)*3,marginVertical: Constants.BaseStyle.DEVICE_WIDTH*2/100,}}>{'Cancel'}</Text>
+                 </TouchableOpacity>
+
+               </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
       </ScrollView>
     )
   }
 
   checkExistenceDocuments(obj) {
-  let array = this.props.driverData.data.vechiles.docDetails
-  for (var i = 0; i < array.length; i++) {
-    if (array[i].docType == obj) {
-        return true;
+    let array = this.props.driverData.data.vechiles.docDetails
+    for (var i = 0; i < array.length; i++) {
+      if (array[i].docType == obj) {
+          return true;
+      }
     }
-}
-return false;
-}
+    return false;
+  }
+
+  OnClickConfirm()
+  {
+
+    if(!this.state.isConfirmed)
+    {
+      this.setProgressBarValue(30);
+    }
+    this.setState({isConfirmed : !this.state.isConfirmed});
+  }
 
 
   renderDocuments(image_type, text) {
 
     //console.log("image_type",image_type)
       //console.log('license doc type from api ******* ',this.props.driverData.data)
+      //this.setProgressBarValue(26);
       if(image_type == 'license'){
-        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type)} underlayColor='#fee989' style={styles.ImageBorder}>
+        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type,26)} underlayColor='#fee989' style={styles.ImageBorder}>
             <View style={[styles.bottomInnerViewStyle]}>
               <Image source={this.state.LicenceImage} style={styles.insideIcon} resizeMode={'contain'} />
               <Text style={[styles.bottomLabel, { fontSize: 10, color: Constants.Colors.Blue }]}>{text}</Text>
@@ -1487,7 +1819,7 @@ return false;
           </TouchableOpacity>)
       }
       if(image_type == 'insurance'){
-        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type)} underlayColor='#fee989' style={styles.ImageBorder}>
+        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type,27)} underlayColor='#fee989' style={styles.ImageBorder}>
             <View style={[styles.bottomInnerViewStyle]}>
               <Image source={this.state.InsuranceImage} style={styles.insideIcon} resizeMode={'contain'} />
               <Text style={[styles.bottomLabel, { fontSize: 10, color: Constants.Colors.Blue }]}>{text}</Text>
@@ -1495,15 +1827,15 @@ return false;
           </TouchableOpacity>)
       }
       if(image_type == 'background'){
-        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type)} underlayColor='#fee989' style={styles.ImageBorder}>
+        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type,28)} underlayColor='#fee989' style={styles.ImageBorder}>
             <View style={[styles.bottomInnerViewStyle]}>
               <Image source={this.state.Background} style={styles.insideIcon} resizeMode={'contain'} />
               <Text style={[styles.bottomLabel, { fontSize: 10, color: Constants.Colors.Blue }]}>{text}</Text>
             </View>
           </TouchableOpacity>)
-      } 
+      }
       if(image_type == 'abstract'){
-        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type)} underlayColor='#fee989' style={styles.ImageBorder}>
+        return (<TouchableOpacity onPress={() => this.openImagePicker(image_type,29)} underlayColor='#fee989' style={styles.ImageBorder}>
             <View style={[styles.bottomInnerViewStyle]}>
               <Image source={this.state.DriverExtract} style={styles.insideIcon} resizeMode={'contain'} />
               <Text style={[styles.bottomLabel, { fontSize: 10, color: Constants.Colors.Blue }]}>{text}</Text>
@@ -1516,11 +1848,14 @@ return false;
   renderVehicleInfoForm(){
 
     // console.log('license image state ********* ',this.props.driverData.data.vechiles.license)
-
+    // let costDataButton = this.state.costData.find(e => e.selected == true);
+    //     costDataButton = costDataButton ? costDataButton.value : this.state.costData[0].label;
       return(
         <ScrollView keyboardDismissMode={(Platform.OS === 'ios') ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="always">
             <View  style={[styles.container]}>
-              
+            {console.log("datainrender",this.state)}
+            {console.log("datainrenderprops",this.props)}
+            <View style={{marginLeft:15}}>
               <View style={styles.flexRow}>
                 <View style={[styles.colIndex]}>
                   <FormTextInput
@@ -1535,63 +1870,111 @@ return false;
                   isPassword={false}
                   showPassword={false}
                   onChangeText={(vehicleNo)=>this.setState({vehicleNo})}
-                  onBlur={() => {this.setProgressBarValue()}}
+                  onBlur={() => {this.setProgressBarValue(16)}}
                   />
                 </View>
 
                 <Dropdown
-                containerStyle={{flex:1,marginTop:-9,marginHorizontal:10,marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*4}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={ this.state.vehicleType||Constants.Strings.driverVehicle.vehicleType}
-                data={this.state.vehicleTypeList}
-                fontSize={15}
-                onChangeText={(vehicleType)=>{this.selectVehicleType(vehicleType)}}
-                />
+                  containerStyle={{flex:1,marginTop:-9,marginHorizontal:10,marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*4}}
+                  textColor ={Constants.Colors.Blue}
+                  baseColor ={Constants.Colors.Blue}
+                  value={ this.state.vehicleType||Constants.Strings.driverVehicle.vehicleType}
+                  data={this.state.vehicleTypeList}
+                  fontSize={15}
+                  onChangeText={this.selectVehicleType.bind(this)}
+                  />
               </View>
 
               <View style={styles.flexRow}>
+             
                 <Dropdown
                 containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
                 textColor ={Constants.Colors.Blue}
                 baseColor ={Constants.Colors.Blue}
                 value={ this.state.makeOfVehicle||Constants.Strings.driverVehicle.makeOfVehicle}
-                data={this.state.vehicleMakeList}
+                data={this.props.vehicleMakeList}
                 fontSize={14}
                 onChangeText={(makeOfVehicle)=>{ this.selectMakeOfVehicle(makeOfVehicle)}}
                 />
 
+
                 <Dropdown
-                containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={ this.state.vehicleModel||Constants.Strings.driverVehicle.vehicleModel}
-                data={this.state.vehicleModelList}
-                fontSize={14}
-                onChangeText={(vehicleModel)=>{this.selectVehicleModel(vehicleModel)}}
-                />
+                  containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
+                  textColor ={Constants.Colors.Blue}
+                  baseColor ={Constants.Colors.Blue}
+                  value={ this.state.vehicleModel||Constants.Strings.driverVehicle.vehicleModel}
+                  data={this.props.vehicleModelList}
+                  fontSize={14}
+                  onChangeText={(vehicleModel)=>{this.selectVehicleModel(vehicleModel)}}
+                  />
               </View>
 
               <View style={styles.flexRow}>
                 <Dropdown
-                containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={ this.state.year||Constants.Strings.driverVehicle.year+"*"}
-                data={this.state.vehicleYearList}
-                fontSize={14}
-                onChangeText={(year)=>{this.selectVehicleYear(year)}}
-                />
-                <Dropdown
-                containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={this.state.equipment||Constants.Strings.driverVehicle.equipment}
-                data={this.state.equipmentList}
-                fontSize={14}
-                onChangeText={(equipment)=>{this.selectEquipment(equipment)}}
-                />
+                  containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
+                  textColor ={Constants.Colors.Blue}
+                  baseColor ={Constants.Colors.Blue}
+                  value={ this.state.year||Constants.Strings.driverVehicle.year+"*"}
+                  data={this.state.vehicleYearList}
+                  fontSize={14}
+                  onChangeText={(year)=>{this.selectVehicleYear(year)}}
+                  />
+
+                  <Text style={[{textAlign:'left',color:Constants.Colors.Blue,marginTop: Constants.BaseStyle.DEVICE_WIDTH*4/100,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
+                  {this.state.room}
+                  </Text>
+                  <FormTextInput
+                    autoFocus={false}
+                    placeHolderText="CAPACITY"
+                    placeHolderColor={Constants.Colors.Blue}
+                    value={this.state.capacity}
+                    style = {[styles.inputTextViewStyle,{flex:1,marginTop:-20,marginHorizontal:10}]}
+                    inputStyle={[styles.inputStyle]}
+                    secureText={false}
+                    isPassword={false}
+                    showPassword={false}
+                    onChangeText={(year)=>{this.selectCapacity(year)}}
+                    onBlur={() => {this.setProgressBarValue(23)}}
+                    />
+                   {/* <Dropdown
+                     containerStyle={{flex:1,marginTop:-20,marginHorizontal:10}}
+                     textColor ={Constants.Colors.Blue}
+                     baseColor ={Constants.Colors.Blue}
+                     value={ this.state.capacity}
+                     data={this.state.capacityList}
+                     fontSize={14}
+                     onChangeText={(year)=>{this.selectCapacity(year)}}
+                     /> */}
+
               </View>
+
+
+              <Text style={[{textAlign:'left',color:Constants.Colors.Blue,marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100,marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}]}>
+              {Constants.Strings.driverVehicle.equipment}
+              </Text>
+              <View style={{flex:1}}>
+                 <LabelSelect
+                   title="Select Equipments"
+                   ref="select"
+                   style={styles.labelSelect}
+                   onConfirm={this.selectConfirmEquipment}
+                 >
+                   {this.state.equipmentList && this.state.equipmentList.filter(item => item.isSelected).map((item, index) =>
+                     <LabelSelect.Label
+                       key={'label-' + index}
+                       data={item}
+                       onCancel={() => {this.deleteEquipmentItem(item);}}
+                     >{item.value}</LabelSelect.Label>
+                   )}
+                   {this.state.equipmentList && this.state.equipmentList.filter(item => !item.isSelected).map((item, index) =>
+                     <LabelSelect.ModalItem
+                       key={'modal-item-' + index}
+                       data={item}
+                     >{item.value}</LabelSelect.ModalItem>
+                   )}
+                 </LabelSelect>
+               </View>
+
 
               <View style={styles.flexRow}>
                 <View style={[styles.colIndex]}>
@@ -1607,7 +1990,7 @@ return false;
                     isPassword={false}
                     showPassword={false}
                     onChangeText={(insuranceNo)=>this.setState({insuranceNo})}
-                    onBlur={() => {this.setProgressBarValue()}}
+                    onBlur={() => {this.setProgressBarValue(23)}}
                     />
                 </View>
 
@@ -1632,15 +2015,6 @@ return false;
                 onDateChange={(insuranceExpiry)=>{this.selectInsuranceExpiry(insuranceExpiry)}}
                 />
 
-                {/* <Dropdown
-                containerStyle={{flex:1,marginTop:-12,marginHorizontal:10}}
-                textColor ={Constants.Colors.Blue}
-                baseColor ={Constants.Colors.Blue}
-                value={ Constants.Strings.driverVehicle.insuranceExpiry}
-                data={this.state.insuranceExpiryList}
-                fontSize={14}
-                onChangeText={(insuranceExpiry)=>{this.selectInsuranceExpiry(insuranceExpiry)}}
-                /> */}
               </View>
 
               <View style={{marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5}}>
@@ -1676,7 +2050,7 @@ return false;
                     })
 
                   }
-                  
+
                   <TouchableOpacity style={styles.cameraImages} onPress={() => this.renderVehicleImages()}>
                     <Image source={Constants.Images.driver.circleplus} style={styles.insideCamera}  resizeMode={'contain'} />
                   </TouchableOpacity>
@@ -1692,7 +2066,7 @@ return false;
                   {this.renderDocuments("license","Driver License Photo")}
 
                   { this.renderDocuments("insurance","Vehicle Insurance Photo")}
-                  
+
                   { this.renderDocuments("background","Background Check Photo")}
 
                   { this.renderDocuments("abstract","Driver Extract Photo")}
@@ -1700,7 +2074,7 @@ return false;
                 </View>
               </View>
 
-              <TouchableOpacity onPress={() => {this.setState({isConfirmed:!this.state.isConfirmed})}} underlayColor='#fee989' style={[styles.colIndex,{marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginTop:(Constants.BaseStyle.DEVICE_HEIGHT/100)*1.2}]}>
+              <TouchableOpacity onPress={() => {this.OnClickConfirm()}} underlayColor='#fee989' style={[styles.colIndex,{marginHorizontal:(Constants.BaseStyle.DEVICE_WIDTH/100)*5,marginTop:(Constants.BaseStyle.DEVICE_HEIGHT/100)*1.2}]}>
                 <View style={[styles.flexRow]}>
                   <Image source={(this.state.isConfirmed) ? Constants.Images.driver.checked : Constants.Images.driver.unchecked} style={[{width:20, height:20}]} resizeMode={'contain'} />
                   <Text style={[{color:Constants.Colors.Blue,flex:1 ,fontSize:12,fontWeight:"900", marginLeft:10}]}>{Constants.Strings.driverVehicle.agreement}</Text>
@@ -1725,7 +2099,7 @@ return false;
                   />
                 </View>
               </View>
-
+</View>
             </View>
         </ScrollView>
       )
@@ -1749,7 +2123,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     marginVertical: Constants.BaseStyle.DEVICE_WIDTH*1/100,
     borderBottomWidth: 1,
-    
+
     //borderBottomColor:Constants.Colors.Blue
   },
   rowLeft : {
@@ -1765,8 +2139,8 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0,
     borderRightWidth: 0,
     borderTopWidth: 0,
-   
-    
+
+
     //borderBottomColor:Constants.Colors.Blue
   },
   row : {
@@ -1809,19 +2183,27 @@ const styles = StyleSheet.create({
   TopHeader: {
 			backgroundColor:'#53C8E5',
 			height: Constants.BaseStyle.DEVICE_HEIGHT/100*10,
-			//flexDirection:'row',
+			flexDirection:'row',
       alignItems:'center',
       justifyContent:'center',
-      
+
 		},
   TopHeaderText : {
     flex:1,
     textAlign: "center",
-    marginTop:Constants.BaseStyle.DEVICE_HEIGHT/100*3,
+    //marginTop:Constants.BaseStyle.DEVICE_HEIGHT/100*3,
+    marginLeft:(Constants.BaseStyle.DEVICE_WIDTH/100)*15,
     fontWeight:'900',
     fontSize:16,
     color: '#fff',
   },
+  TopHeadRight: {
+		flexDirection:'row',
+		height:Constants.BaseStyle.DEVICE_HEIGHT/100*10,
+		alignItems:'center',
+		justifyContent:'flex-end',
+		backgroundColor:'transparent'
+	},
   logo: {
     height: 30,
     width: 30,
@@ -1830,8 +2212,16 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
   },
+  Sidelogo: {
+    height: 20,
+    width: 20,
+    margin:20,
+    alignSelf:'center',
+    justifyContent:'center',
+    tintColor: '#fff',
+  },
   flexRow:{
-		flexDirection: 'row',
+    flexDirection: 'row'
 	},
   colIndex:{
 		flex:1,
@@ -1998,7 +2388,11 @@ const mapStateToProps = state => ({
   userData:state.user.userData,
   driverData:(state.user && state.user.driverData) || (state.user && state.user.userData),
   citiesList: state.user.citiesList ,
-  certificatesList:state.user.certificatesList  
+  certificatesList:state.user.certificatesList,
+  experienceTypeList : state.user.experienceTypeList,
+  vehicleTypeList : state.user.vehicleTypeList,
+  vehicleMakeList : state.user.vehicleMakeList,
+  vehicleModelList : state.user.vehicleModelList,
 });
 
 const mapDispatchToProps = dispatch => ({

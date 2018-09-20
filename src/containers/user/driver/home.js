@@ -27,6 +27,10 @@ import { connect } from 'react-redux';
 import DriverFormSubmit from '../../../components/driver/DriverFormSubmit';
 import DriverFormReject from '../../../components/driver/DriverFormReject';
 
+import * as UserActions from '../../../redux/modules/user';
+import { bindActionCreators } from "redux";
+import { ToastActionsCreators } from 'react-native-redux-toast';
+
 class Home extends Component<{}> {
   constructor(props){
     super(props);
@@ -35,6 +39,25 @@ class Home extends Component<{}> {
     }
     //console.log('props ********* ',props)
   }
+  componentDidMount(){
+    const { dispatch } = this.props.navigation;
+    var status=this.props.userData.data.driverStatus;
+    //if(status == 'rejected' || status == 'suspended')
+    //{
+      this.timer = setInterval(()=> {
+       this.props.UserActions.getDriverStatus(this.props.tokenforuser);
+       if(this.props.driverStatus != this.props.newdriverStatus)
+         dispatch(ToastActionsCreators.displayInfo('Your status is '+status));
+       }, 60000)
+    //}
+   }
+
+   componentWillUnmount()
+   {
+     clearInterval(this.timer);
+   }
+
+
 
   componentWillReceiveProps(nextProps){
     //console.log('nextProps ******* ',nextProps)
@@ -46,7 +69,7 @@ class Home extends Component<{}> {
       // var date = new Date(), y = date.getFullYear(), m = date.getMonth();
       // var firstDay = new Date(y, m, 1);
       // var lastDay = new Date(y, m + 1, 0);
-      
+
       // firstDay = moment(firstDay).format("YYYY-MM-DD");
       // lastDay = moment(lastDay).format("YYYY-MM-DD");
       // this.setState({
@@ -54,7 +77,7 @@ class Home extends Component<{}> {
       //   endDate:lastDay,
       //   scheduleDatesList: nextProps.scheduleDatesList
       //   },()=>{
-      //     console.log('isnide componet will mount home ********* ',{...this.state},this.props.tokenforuser) 
+      //     console.log('isnide componet will mount home ********* ',{...this.state},this.props.tokenforuser)
       //     this.props.ScheduleActions.scheduledDateList({...this.state},this.props.tokenforuser);
       // })
       //this.forceUpdate()
@@ -68,19 +91,19 @@ class Home extends Component<{}> {
 
   // }
   homeSchedule(){
-    
-  
+
+
     this.props.navigation.navigate('Home_ScheduleOrder',{selectedDateObj:new Date(),refreshCal: this.refreshCalFunction})
-    
+
       }
 
       refreshCalFunction=()=>{
-    
+
     console.log('refreshCalendor')
 
     this.child.calendorUpdate();
-  
-    
+
+
       }
 
   render() {
@@ -203,14 +226,17 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = state => ({
+  tokenforuser:(state.user.driverData && state.user.driverData.token) || (state.user.userData && state.user.userData.token),
   modalstate: state.ModalHandleReducer,
   driverAvailabilityStatus: state.user.driverAvailabilityStatus,
   userData: (state.user && state.user.driverData) || (state.user && state.user.userData),
+  driverStatus : state.user.driverStatus,
+  newdriverStatus : state.user.newdriverStatus,
   //scheduleDatesList: state.schedule.scheduleDatesList,
 });
 
-// const mapDispatchToProps = dispatch => ({
-//   UserActions: bindActionCreators(UserActions, dispatch)
-// });
+const mapDispatchToProps = dispatch => ({
+  UserActions: bindActionCreators(UserActions, dispatch)
+});
 
-export default connect(mapStateToProps, null)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

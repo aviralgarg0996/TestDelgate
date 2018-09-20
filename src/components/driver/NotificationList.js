@@ -13,7 +13,7 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  
+
 } from "react-native";
 
 
@@ -28,20 +28,18 @@ import { bindActionCreators } from "redux";
     super(props);
     // this.state = {
 
-    
+
     //   notificationsList:props.notificationsList
-     
+
     // };
   }
 
   componentWillMount(){
-
-
-this.props.NotificationActions.getAllNotification(this.props.tokenforuser);
-
+      this.props.NotificationActions.getAllNotification(this.props.tokenforuser);
   }
+  
   renderNotificationList(value) {
-   
+
     return (
       <TouchableOpacity style={[styles.cardView]}>
         <View style={styles.categoryRow}>
@@ -97,10 +95,10 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => (
   {
-  
+
   tokenforuser: (state.user.userData && state.user.userData.token) || (state.user.driverData && state.user.driverData.token),
   notificationsList:state.notifications.notificationsList
- 
+
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -108,4 +106,3 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(NotificationList);
-

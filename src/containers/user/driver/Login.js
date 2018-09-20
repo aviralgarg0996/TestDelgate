@@ -28,10 +28,12 @@ import { bindActionCreators } from "redux";
 import * as UserActions from '../../../redux/modules/user';
 import Regex from '../../../utilities/Regex';
 import _ from "lodash";
-import PhoneVerification from "../../../components/driver/PhoneVerification";
+//import PhoneVerification from "../../../components/driver/PhoneVerification";
 import OtpVerification from "../../../components/driver/OtpVerification";
 import ResetPassword from "../../../components/driver/ResetPassword";
 import NewUser from "../../../components/driver/NewUser";
+import PhoneVerification from "../../../components/driver/PhoneVerification";
+import EmailVerification from "../../../components/driver/EmailVerification";
 
 class Login extends Component<{}> {
   constructor(props){
@@ -80,7 +82,7 @@ class Login extends Component<{}> {
     //   email:'',
     //   password:''
     // })
-    
+
   }
 
   render() {
@@ -101,7 +103,7 @@ class Login extends Component<{}> {
               isPassword={false}
               showPassword={false}
               onChangeText={(email)=>this.setState({email})}
-              
+
             />
             <FormTextInput
               autoFocus={false}
@@ -112,7 +114,7 @@ class Login extends Component<{}> {
               isPassword={false}
               showPassword={false}
               onChangeText={(password)=>this.setState({password})}
-              
+
             />
             <SubmitButton
               onPress={()=>this.loginUser()}
@@ -135,6 +137,7 @@ class Login extends Component<{}> {
             <PhoneVerification  navigation={navigate} dispatch={this.props.navigation} />
           </Modal> */}
           {/* {console.warn(this.props.navigation)} */}
+
           <Modal animationType={"fade"} transparent={true} visible={this.props.modalstate.ForgotPassModalVisible} onRequestClose={() => {this.props.dispatch({type:'FORGOT_PASSWORD_VISIBILITY',visibility:false})}}>
             <ForgotPassword navigation={navigate} dispatch={this.props.navigation}/>
           </Modal>
@@ -149,6 +152,15 @@ class Login extends Component<{}> {
           <Modal animationType={"fade"} transparent={true} visible={this.props.modalstate.NewUserModalVisible} onRequestClose={() => {this.props.navigation.dispatch({type:'NEWUSER_VISIBILITY',visibility:false})}}>
             <NewUser navigation={navigate} dispatch={this.props.navigation} />
           </Modal>
+
+          <Modal animationType={"fade"} transparent={true} visible={this.props.modalstate.PhoneVerificationModalVisible} onRequestClose={() => {this.props.navigation.dispatch({type:'PHONEVERIFICATION_VISIBILITY',visibility:false})}}>
+            <PhoneVerification navigation={navigate} dispatch={this.props.navigation} />
+          </Modal>
+
+          <Modal animationType={"fade"} transparent={true} visible={this.props.modalstate.EmailVerificationModalVisible} onRequestClose={() => {this.props.navigation.dispatch({type:'EMAILVERIFICATION_VISIBILITY',visibility:false})}}>
+            <EmailVerification navigation={navigate} dispatch={this.props.navigation} />
+          </Modal>
+
         </ScrollView>
       </Background>
     );

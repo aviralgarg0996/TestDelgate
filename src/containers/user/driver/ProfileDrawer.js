@@ -27,7 +27,7 @@ import { bindActionCreators } from "redux";
 import * as UserActions from '../../../redux/modules/user';
 import { connect } from 'react-redux';
 import Connection from '../../../config/Connection'
-
+import PhotoUpload from 'react-native-photo-upload'
 class ProfileDrawer extends Component<{}> {
   constructor(props) {
     super(props);
@@ -106,7 +106,23 @@ class ProfileDrawer extends Component<{}> {
         <View style={styles.container}>
           <ScrollView>
           <View style={styles.rootContainer}>
-            <ImageBackground
+          <PhotoUpload
+          containerStyle={styles.imageCover}
+   onPhotoSelect={avatar => {
+     if (avatar) {
+       console.log('Image base64 string: ', avatar)
+     }
+   }}
+ >
+   <Image
+     style={styles.imageCover}
+     resizeMode='cover'
+     source={{
+       uri: 'https://www.sparklabs.com/forum/styles/comboot/theme/images/default_avatar.jpg'
+     }}
+   />
+ </PhotoUpload>
+            {/* <ImageBackground
               source={{
                 uri:
                   "https://reactnativecode.com/wp-content/uploads/2018/02/motorcycle.jpg"
@@ -116,19 +132,19 @@ class ProfileDrawer extends Component<{}> {
               <TouchableOpacity onPress={() => this.editCoverImage()}>
               <Icon name='pencil' style={styles.editIcon}  size={25} color="black" />
               </TouchableOpacity>
-            </ImageBackground>
-            <View style={styles.subContainer}>
-              <Image
+            </ImageBackground> 
+             <View style={styles.subContainer}> */}
+              {/* <Image
                 style={styles.imageProfile}
                 source={{
                   uri:this.props.userData ? Connection.getMedia()+ this.props.userData.data.profile : "https://reactnativecode.com/wp-content/uploads/2018/02/motorcycle.jpg"
                 }}
-              />
-              <View style={{bottom:Constants.BaseStyle.DEVICE_HEIGHT/100*9,marginLeft:Constants.BaseStyle.DEVICE_WIDTH/100*36}}>
+              /> */}
+              {/* <View style={{bottom:Constants.BaseStyle.DEVICE_HEIGHT/100*9,marginLeft:Constants.BaseStyle.DEVICE_WIDTH/100*36}}>
                 <Text style={[styles.nameText]}>{this.props.userData && this.props.userData.data.firstName} {this.props.userData && this.props.userData.data.lastName}</Text>
                 <View>
                   <Text onPress={()=>navigate('RatingReviews')} style={[styles.reviewText]}><Text style={[styles.reviewText]}>0 </Text>REVIEWS</Text>
-                  {/*<Text
+                  <Text
                   onPress={()=>navigate('Followers')}
                     style={[
                       styles.reviewText,
@@ -137,12 +153,12 @@ class ProfileDrawer extends Component<{}> {
                   >
                    <Text style={[styles.reviewText,{fontWeight: "800",}]}>50 </Text>
                    FOLLOWERS
-                  </Text>*/}
+                  </Text>
                 </View>
               </View>
-            </View>
+            </View>  */}
           </View>
-
+{alert(JSON.stringify(this.props.userData))}
           <View style={{ marginHorizontal: 20 }}>
             <StarRating
               rating={"3"}
@@ -239,7 +255,8 @@ const styles = StyleSheet.create({
   },
   imageCover: {
     height: Constants.BaseStyle.DEVICE_HEIGHT / 100 * 25,
-    width: Constants.BaseStyle.DEVICE_WIDTH
+    width: Constants.BaseStyle.DEVICE_WIDTH,
+    // borderWidth:3
   },
   imageProfile: {
 
