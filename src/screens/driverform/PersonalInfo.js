@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {ScrollView,View,Text,StyleSheet,TextInput,Dimensions,Button,TouchableOpacity,Image} from "react-native"
+import {ScrollView,View,Text,StyleSheet,TextInput,Dimensions,Button,TouchableOpacity,Image,AsyncStorage} from "react-native"
 import DatePicker from 'react-native-datepicker'
 import { Dropdown } from 'react-native-material-dropdown';
 import { bindActionCreators } from "redux";
@@ -45,11 +45,19 @@ class PersonalInfo extends Component {
         aboutYou:"",
         licenceIssueDate:"",
         licenceExpiryDate:"",
-        sex:""
+        sex:"",
+      token:""
+        
 
     }
   }
 
+  componentWillMount = () => {
+    AsyncStorage.getItem("token").then((value) => {
+		this.setState({token:value})
+	})
+  }
+  
   addTextInput = (key) => {
     let ExperienceInputView = this.state.ExperienceInputView;
     ExperienceInputView.push(<View style={styles.rowContainerStyle}>
@@ -97,19 +105,19 @@ if(imageType=='experience')
   }
 
   onSubmitPersonalData=()=>{
-    // if(this.state.firstName=="")
-    // this.refs.toast.show('Please Enter First Name!',DURATION.LENGTH_LONG);
-    // else if(this.state.lastName=="")
-    // this.refs.toast.show('Please Enter Last Name!',DURATION.LENGTH_LONG);
-    // else if(this.state.birthDate=="")
-    // this.refs.toast.show('Please Select Birth Data!',DURATION.LENGTH_LONG);
-    // else if(this.state.genderData=="")
-    // this.refs.toast.show('Please Select Gender!',DURATION.LENGTH_LONG);
-    // else if(this.state.sinNumber=="")
-    // this.refs.toast.show('Please Enter SIN Number!',DURATION.LENGTH_LONG);
-    // else if(this.state.licenceNumber=="")
-    // this.refs.toast.show('Please Enter Licence Number!',DURATION.LENGTH_LONG);
-    // else
+    if(this.state.firstName=="")
+    this.refs.toast.show('Please Enter First Name!',DURATION.LENGTH_LONG);
+    else if(this.state.lastName=="")
+    this.refs.toast.show('Please Enter Last Name!',DURATION.LENGTH_LONG);
+    else if(this.state.birthDate=="")
+    this.refs.toast.show('Please Select Birth Data!',DURATION.LENGTH_LONG);
+    else if(this.state.genderData=="")
+    this.refs.toast.show('Please Select Gender!',DURATION.LENGTH_LONG);
+    else if(this.state.sinNumber=="")
+    this.refs.toast.show('Please Enter SIN Number!',DURATION.LENGTH_LONG);
+    else if(this.state.licenceNumber=="")
+    this.refs.toast.show('Please Enter Licence Number!',DURATION.LENGTH_LONG);
+    else
     this.props.UserActions.userDriverForm({...this.state});
   }
 
@@ -323,7 +331,7 @@ rowContainerStyle:{
   flex:1,
   flexDirection:"row",
   margin:5,
-  // alignItems:"center",
+   alignItems:"flex-end",
   justifyContent:"space-between"
 },
 textInputStyle:{

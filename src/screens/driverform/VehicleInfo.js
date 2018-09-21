@@ -1,11 +1,18 @@
 import React, { Component } from 'react'
-import {ScrollView,View,Text,StyleSheet,TextInput,Dimensions,Button,TouchableOpacity,Image} from "react-native"
+import {ScrollView,View,Text,StyleSheet,TextInput,Dimensions,Button,TouchableOpacity,Image,AsyncStorage} from "react-native"
 import Background from '../../components/common/Background';
 import DatePicker from 'react-native-datepicker'
 import ImagePicker from "react-native-image-picker";
 import { Dropdown } from 'react-native-material-dropdown';
+import { bindActionCreators } from "redux";
+import RestClient from '../../utilities/RestClient';
+import Constants from "../../constants"
+import * as UserActions from '../../redux/modules/user';
+import { connect } from 'react-redux';
+import { asyncLocalStorage } from 'redux-persist/storages';
+import { startLoading, stopLoading, showToast, hideToast } from '../../redux/modules/app';
 const { height, width } = Dimensions.get('window');
-export default class VehicleInfo extends Component {
+class VehicleInfo extends Component {
   constructor(props){
     super(props);
     this.state = {
@@ -16,8 +23,38 @@ export default class VehicleInfo extends Component {
       licenceImageSource:"",
       insuranceImageSource:"",
       backgroundCheckSource:"",
-      driverExtractSource:""
+      driverExtractSource:"",
+      VehicleTypeData:[],
+      MakeOfVehicleData:[],
+      ModelData:[],
+      token:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiICIsImlkIjoiNWJhMjk1YmEzMzUyMTQxMDZjYzk0NTAzIiwicm9sZSI6IkRSSVZFUiIsImlhdCI6MTUzNzQ3MzY4NX0.ZCivOxYb6aHUe0BeUgHF0p2nBCU2wWutBrNNL7ufa3k"
     }}
+    componentDidMount = () => {
+      startLoading();
+      this.getToken();
+     
+
+    }
+    getToken = () =>{
+      AsyncStorage.getItem("token").then((value) => {
+        console.log("token1",value)
+        this.setState({token:value})
+      });
+      this.getVehicleTypeData();
+    }
+    getVehicleTypeData=()=>{
+      console.log("token",this.state.token)
+      RestClient.get("drivers/getVechicleType",{},this.state.token).then((result) => {
+        console.log('result getVehicle ******* ',result)
+       if(result.status == 1){
+        stopLoading();
+        this.setState({VehicleTypeData:result.data})
+        }
+      }).catch(error => {
+          alert("error=> "+error)
+          dispatch(stopLoading());
+      });
+    }
     openImagePicker=(imageType)=>{
       ImagePicker.showImagePicker( (response) => {
         if (response.didCancel) {
@@ -63,6 +100,11 @@ export default class VehicleInfo extends Component {
     }, {
       value: 'Others',
     }];
+    let vehicleTypeList=[]
+    this.state.VehicleTypeData!=[] && this.state.VehicleTypeData.map((data,key)=>{
+      vehicleTypeList.push({value:data.name,id:data._id})
+    })
+    console.log("vehicleTypeList",vehicleTypeList)
     return (
       <Background style={styles.mainContainer}>
       <ScrollView style={styles.container}>
@@ -84,7 +126,7 @@ export default class VehicleInfo extends Component {
   <Dropdown
   containerStyle={styles.textInputStyle}
         label='Vehicle Type'
-        data={genderData}
+        data={vehicleTypeList}
       />
   </View>
   <View>
@@ -109,6 +151,7 @@ export default class VehicleInfo extends Component {
   <View>
   <Text>Year</Text>
   <Dropdown
+  onChange={()=>alert("hi")}
   containerStyle={styles.textInputStyle}
         label='Year'
         data={genderData}
@@ -284,3 +327,22 @@ textInputStyle:{
   }
   
 })
+const mapStateToProps = state => ({
+  // tokenforuser:(state.user.driverData && state.user.driverData.token) || (state.user.userData && state.user.userData.token),
+  // modalstate: state.ModalHandleReducer,
+  // driverInfo:state.ModalHandleReducer.DriverInfo,
+  // userData:state.user.userData,
+  // driverData:(state.user && state.user.driverData) || (state.user && state.user.userData),
+  // citiesList: state.user.citiesList ,
+  // certificatesList:state.user.certificatesList,
+  // experienceTypeList : state.user.experienceTypeList,
+  // vehicleTypeList : state.user.vehicleTypeList,
+  // vehicleMakeList : state.user.vehicleMakeList,
+  // vehicleModelList : state.user.vehicleModelList,
+});
+
+const mapDispatchToProps = dispatch => ({
+  UserActions: bindActionCreators(UserActions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(VehicleInfo);

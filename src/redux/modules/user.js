@@ -1,6 +1,7 @@
 'use strict';
 import {
-  Platform,
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import _ from "underscore";
 import { startLoading, stopLoading, showToast, hideToast } from './app';
@@ -58,6 +59,7 @@ export const GET_VEHICLEMODAL_LIST = (data) => ({ type: VEHICLEMODAL_LIST, data 
 /**
 * Signup API.
 */
+var token;
 export const consumerSignup = (data) => {
 	//console.log('data ********* ',data)
 	let agreeTerms;
@@ -238,6 +240,7 @@ export const userLogin = (data) => {
 		dispatch(startLoading());
 		RestClient.post("users/login",requestObject).then((result) => {
 			console.log('result login ******* ',result)
+			AsyncStorage.setItem("token",result.token)
  		if(result.status == 1)
     {
     		dispatch(stopLoading());
@@ -308,8 +311,8 @@ export const userDriverForm= (data) => {
 		body.append('address', data.address);
 		body.append('about', data.aboutYou);
 		body.append('page', "1");
-		// body.append('experienceYear', data.experienceYear);
-		// body.append('experienceMon', data.experienceMonth);
+		body.append('experienceYear', "");
+		body.append('experienceMon', "");
     var arr1=[];
     // if(data.experience.length>0)
     // {
@@ -348,9 +351,8 @@ export const userDriverForm= (data) => {
 
 		//body.append('certificates',JSON.stringify(data.certificates));
 		////body.append('cities', data.locationServe);
-
 		console.log('data body  ********* ',body)
-
+console.log("token",token)
 		return dispatch => {
 			dispatch(startLoading());
 			RestClient.imageUpload("users/profile",body,data.token).then((result) => {
@@ -360,6 +362,7 @@ export const userDriverForm= (data) => {
 				dispatch(ToastActionsCreators.displayInfo('Data saved successfully'))
 						// dispatch(ToastActionsCreators.displayInfo(result.message));
 				}else{
+
 					dispatch(stopLoading());
 					// dispatch(ToastActionsCreators.displayInfo(result.message));
 				}
