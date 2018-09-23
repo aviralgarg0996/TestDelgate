@@ -76,6 +76,8 @@ import Orders_Pending from "../containers/user/customer/Orders_Pending";
 import Orders_OnGoing from "../containers/user/customer/Orders_OnGoing";
 import Orders_Scheduled from "../containers/user/customer/Orders_Scheduled";
 
+import Success from "../containers/user/driver/Success";
+
 // export list of routes.
 export default routes = {
     Loader : { screen: Loader },
@@ -105,7 +107,7 @@ export default routes = {
     AppIntroduction: { screen: AppIntroduction},
     SplashScreen: {screen: SplashScreen},
     LandingScreen:{screen:LandingScreen},
-
+    Success:{screen:Success},
 //
 profile: { screen:DrawerNavigator({
         Home: {

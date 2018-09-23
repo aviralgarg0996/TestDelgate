@@ -117,6 +117,20 @@ if(imageType=='experience')
     this.refs.toast.show('Please Enter SIN Number!',DURATION.LENGTH_LONG);
     else if(this.state.licenceNumber=="")
     this.refs.toast.show('Please Enter Licence Number!',DURATION.LENGTH_LONG);
+    else if(this.state.address=="")
+    this.refs.toast.show('Please Enter Addess!',DURATION.LENGTH_LONG);
+    else if(this.state.aboutYou=="")
+    this.refs.toast.show('Please Enter Some Information About You!',DURATION.LENGTH_LONG);
+    else if(this.state.licenceNumber=="")
+    this.refs.toast.show('Please Enter Licence Number!',DURATION.LENGTH_LONG);
+    else if(this.state.licenceIssueDate=="")
+    this.refs.toast.show('Please Select Licence Issue Date!',DURATION.LENGTH_LONG);
+    else if(this.state.licenceExpiryDate=="")
+    this.refs.toast.show('Please Select Licence Expiry Date!',DURATION.LENGTH_LONG);
+    else if(this.state.ExperienceImageSource=="")
+    this.refs.toast.show('Please Select Experience Image!',DURATION.LENGTH_LONG);
+    else if(this.state.ProfileImageSource=="")
+    this.refs.toast.show('Please Select Profile Image!',DURATION.LENGTH_LONG);
     else
     this.props.UserActions.userDriverForm({...this.state});
   }
@@ -135,7 +149,7 @@ if(imageType=='experience')
 <View style={styles.rowContainerStyle}>
 <Toast
                     ref="toast"
-                    style={{backgroundColor:'yellow'}}
+                    style={{backgroundColor:'#D6511F'}}
                     position='top'
                     positionValue={200}
                     fadeInDuration={750}
@@ -308,7 +322,7 @@ source={this.state.ProfileImageSource}
 </View>
 <View>
 <Button
-title="Next"
+title="SAVE INFO"
 onPress={()=>{this.onSubmitPersonalData()}}
 />
 

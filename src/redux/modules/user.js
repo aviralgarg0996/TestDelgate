@@ -381,30 +381,36 @@ console.log("token",token)
 
 		let body = new FormData();
 
-		body.append('plateNo', data.vehicleNo);
-		body.append('type', data.vehicleType);
-		body.append('make', data.makeOfVehicle);
-		body.append('modelYear', data.year);
-		body.append('model', data.vehicleModel)
-		body.append('insuranceNo', data.insuranceNo);
-		body.append('insuranceExp', data.insuranceExpiry);
-		if (data.imgSourceVehicle) {
-			data.imgSourceVehicle.map((item, i) => {
-	           let filename = item.fileName;
-	           body.append('addVehicleImage', {
-	               uri: item.uri,
-	               name: filename,
-	               type: item.type
-	           });
-	       	})
-		}else{
-			body.append('addVehicleImage', data.imgSourceVehicle)
-		}
-    var arr1=[];
-    data.equipment.map((item,i) => {
-      arr1[i]=item._id;
-    });
+		body.append('plateNo', data.vehicleNumber);
+		body.append('type', data.selectedVehicleId);
+		body.append('make', data.selectedCompanyId);
+		body.append('modelYear', data.selectedYear);
+		body.append('model', data.selectedVehicleModal)
+		body.append('insuranceNo', data.insuranceNumber);
+		body.append('insuranceExp', data.insuranceExpiryDate);
+		// if (data.imgSourceVehicle) {
+		// 	data.imgSourceVehicle.map((item, i) => {
+	  //          let filename = item.fileName;
+	  //          body.append('addVehicleImage', {
+	  //              uri: item.uri,
+	  //              name: filename,
+	  //              type: item.type
+	  //          });
+	  //      	})
+		// }else{
+		// 	body.append('addVehicleImage', data.imgSourceVehicle)
+		// }
+    // var arr1=[];
+    // data.equipment.map((item,i) => {
+    //   arr1[i]=item._id;
+    // });
 		//body.append('equipment', arr1);
+		if (data.vehicleImage && data.vehicleImage.fileName) {
+			body.append('addVehicleImage', { uri: data.vehicleImage.uri, name: data.vehicleImage.fileName, filename: data.vehicleImage.fileName, type: data.vehicleImage.type });
+		}
+		else {
+			body.append('addVehicleImage', "")
+		}
 		if (data.LicenceImage && data.LicenceImage.fileName) {
 			body.append('license', { uri: data.LicenceImage.uri, name: data.LicenceImage.fileName, filename: data.LicenceImage.fileName, type: data.LicenceImage.type });
 		}
@@ -449,11 +455,13 @@ console.log("token",token)
 
 		//body.append('addDocs', data.vehicleDocs);
 		body.append('driverForm', data.saveState);
-
+	
 		return dispatch => {
+			return new Promise(function(fulfill,reject){
 			dispatch(startLoading());
 			RestClient.imageUpload("users/profile",body,data.token).then((result) => {
-				console.log('result vehicle info ******* ',result)
+				console.log('result vehicle info ******* ',result);
+				fulfill("success");				
 			 if(result.status == 1){
 					dispatch(stopLoading());
 					if(saveState) {
@@ -468,16 +476,18 @@ console.log("token",token)
 					// dispatch(ToastActionsCreators.displayInfo(result.message));
 				}else{
 					dispatch(stopLoading());
-
-					// dispatch(ToastActionsCreators.displayInfo(result.message));
+				 dispatch(ToastActionsCreators.displayInfo(result.message));
 				}
 			}).catch(error => {
 					console.log("error=> ", error)
 					dispatch(stopLoading());
 			});
-		}
-	};
 
+
+		})
+			
+	};
+	}
 
 /* Get Driver Api */
 export const getDriverData =(token)=> {

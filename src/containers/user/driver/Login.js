@@ -35,11 +35,11 @@ import NewUser from "../../../components/driver/NewUser";
 import PhoneVerification from "../../../components/driver/PhoneVerification";
 import EmailVerification from "../../../components/driver/EmailVerification";
 
-class Login extends Component<{}> {
+class Login extends Component {
   constructor(props){
     super(props);
     this.state={
-      email:'aviral@gmail.com',
+      email:'himanshu@gmail.com',
       password:'123456',
       ModalVisible:false,
       deviceToken:props.deviceToken
